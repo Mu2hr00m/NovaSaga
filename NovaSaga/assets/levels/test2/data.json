@@ -1,0 +1,40 @@
+{
+    "level_scale": 8,
+    "type": "test",
+    "teleporters": [
+
+    ],
+    "level_transitions": [
+        {
+            "style": "old",
+            "x": 0,
+            "y": 344,
+            "w": 8,
+            "h": 32,
+            "dest_x": 504,
+            "dest_y": 368,
+            "dest_level": "test"
+        },
+        {
+            "style": "old",
+            "x": 496,
+            "y": 144,
+            "w": 8,
+            "h": 32,
+            "dest_x": 495,
+            "dest_y": 152,
+            "dest_level": "start"
+        }
+    ],
+    "interactables": [
+
+    ],
+    "enemies": [
+
+    ],
+    "cutscenes": [
+
+    ],
+    "boxes": [
+    ]
+}
