@@ -73,25 +73,25 @@ class DynamicTransitionObject():
         if self.rect.collidepoint((player.x,player.y)):
             if self.id==0:
                 try:
-                    level.load(run.intermediary.unloadedLevels[(level.global_position[0],level.global_position[1]-2)].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]-2))].level_id)
                 except AttributeError:
                     level.load("test")
                     print("No valid level could be loaded at "+str(level.global_position[0])+", "+str(level.global_position[1]-2)+", so the default level was loaded")
             elif self.id==1:
                 try:
-                    level.load(run.intermediary.unloadedLevels[(level.global_position[0]+2,level.global_position[1])].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0]+2,level.global_position[1]))].level_id)
                 except AttributeError:
                     level.load("test")
                     print("No valid level could be loaded at "+str(level.global_position[0]+2)+", "+str(level.global_position[1])+", so the default level was loaded")
             elif self.id==2:
                 try:
-                    level.load(run.intermediary.unloadedLevels[(level.global_position[0],level.global_position[1]+2)].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]+2))].level_id)
                 except AttributeError:
                     level.load("test")
                     print("No valid level could be loaded at "+str(level.global_position[0])+", "+str(level.global_position[1]+2)+", so the default level was loaded")
             elif self.id==3:
                 try:
-                    level.load(run.intermediary.unloadedLevels[(level.global_position[0]-2,level.global_position[1])].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0]-2,level.global_position[1]))].level_id)
                 except AttributeError:
                     level.load("test")
                     print("No valid level could be loaded at "+str(level.global_position[0]-2)+", "+str(level.global_position[1])+", so the default level was loaded")
@@ -562,8 +562,9 @@ class Level():
         try:
             for i in data["level_transitions"]:
                 if i["style"]=="old":
+                    print(i)
                     level_transitions.append(TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"])) #add level transitions
-                else:
+                elif i["style"]=="new":
                     level_transitions.append(DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])))
         except:
             pass
@@ -625,7 +626,6 @@ class Level():
         if self.camera[1]+constants.CAM_HEIGHT>=constants.WIN.get_height():
             self.camera[1] = constants.WIN.get_height()-constants.CAM_HEIGHT
         self.camera_surface = constants.WIN.subsurface(self.camera[0],self.camera[1],constants.CAM_WIDTH,constants.CAM_HEIGHT) #update the camera subsurface
-
 class Node():
     def __init__(self,pos,type,maxconnections,owner): #not really used, might be used later
         self.pos = pos
@@ -756,7 +756,9 @@ class Map():
             self.map.set_at((self.doorways[0].pos[0],self.doorways[0].pos[1]+1),constants.MAP_BACKGROUND_COLOR)
             self.map.set_at((self.doorways[0].pos[0]+1,self.doorways[0].pos[1]),constants.PATH_TILE_COLOR)
             pygame.draw.rect(self.map,constants.PATH_TILE_COLOR,pygame.Rect(self.doorways[0].pos[0]-2,self.doorways[0].pos[1]-2,5,5),1)
-            self.unloadedLevels = []
+            self.levelarray = {}
+            self.levelarray.update({str(self.doorways[0].pos),UnloadedLevel("start",self.doorways[0].pos)})
+            self.levelarray.update({str(self.doorways[0].pos),UnloadedLevel("test",(self.doorways[0].pos[0]+2,self.doorways[0].pos[1]))})
 class Run():
     def __init__(self,difficulty,seed=0x00000000): #this object will be saved
         self.seed = seed
