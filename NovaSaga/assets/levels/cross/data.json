@@ -1,0 +1,64 @@
+{
+    "level_scale": 8,
+    "type": "room",
+    "teleporters": [
+
+    ],
+    "level_transitions": [
+        {
+            "style": "new",
+            "x": 8,
+            "y": 0,
+            "w": 32,
+            "h": 8,
+            "transition_id:": 0,
+            "dest_x": 24,
+            "dest_y": 9
+        },
+        {
+            "style": "new",
+            "x": 40,
+            "y": 8,
+            "w": 8,
+            "h": 32,
+            "transition_id:": 1,
+            "dest_x": 39,
+            "dest_y": 24
+        },
+        {
+            "style": "new",
+            "x": 16,
+            "y": 40,
+            "w": 16,
+            "h": 8,
+            "transition_id:": 2,
+            "dest_x": 12,
+            "dest_y": 32
+        },
+        {
+            "style": "new",
+            "x": 0,
+            "y": 8,
+            "w": 8,
+            "h": 32,
+            "transition_id:": 3,
+            "dest_x": 9,
+            "dest_y": 24
+        }
+    ],
+    "interactables": [
+
+    ],
+    "enemies": [
+
+    ],
+    "moving_objects": [
+
+    ],
+    "cutscenes": [
+
+    ],
+    "boxes": [
+        
+    ]
+}
