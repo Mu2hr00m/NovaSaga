@@ -36,7 +36,7 @@ WIN = pygame.transform.scale(disp_win.copy(),(WIDTH,HEIGHT))
 menu_surface = disp_win.copy()
 menu_surface.set_colorkey((0,0,0,0))
 DEF_LEVEL = "test_display.png"
-DEF_START_POS = (16 * BLOCK_SIZE, 5 * BLOCK_SIZE)
+DEF_START_POS = (24 * BLOCK_SIZE, 10 * BLOCK_SIZE)
 PLAYER_VEL = 2
 MAP_BACKGROUND_COLOR = (64,64,64)
 START_TILE_COLOR = (128,0,192)

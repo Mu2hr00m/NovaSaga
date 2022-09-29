@@ -1,0 +1,44 @@
+{
+    "level_scale": 8,
+    "type": "room",
+    "teleporters": [
+
+    ],
+    "level_transitions": [
+        {
+            "style": "new",
+            "x": 112,
+            "y": 184,
+            "w": 40,
+            "h": 8,
+            "transition_id": 2,
+            "dest_x": 152,
+            "dest_y": 176
+        },
+        {
+            "style": "new",
+            "x": 0,
+            "y": 152,
+            "w": 8,
+            "h": 32,
+            "transition_id": 3,
+            "dest_x": 9,
+            "dest_y": 176
+        }
+    ],
+    "interactables": [
+
+    ],
+    "enemies": [
+
+    ],
+    "moving_objects": [
+
+    ],
+    "cutscenes": [
+
+    ],
+    "boxes": [
+        
+    ]
+}

@@ -9,6 +9,7 @@ import json
 boxes = []
 level_transitions = []
 enemies = []
+global_position = [0,0]
 def new_enemy(x,y,maxhp,type,xp=0):
     enemy = Entity(type,type,xp)
     enemy.x = x
@@ -29,6 +30,13 @@ def new_enemy(x,y,maxhp,type,xp=0):
             elif i==len(enemies)-1:
                 enemy.index = i+1
                 enemies.append(enemies)
+def out_of_bounds(pos):
+    oob = False
+    if pos[0]<0 or pos[0]>constants.WIN.get_width()-1:
+        oob = True
+    if pos[1]<0 or pos[1]>constants.WIN.get_height()-1:
+        oob = True
+    return oob
 class Ticker():
     def __init__(self,threshold):
         self.threshold = threshold
@@ -67,38 +75,40 @@ class DynamicTransitionObject():
             self.dest_id = 3
         elif self.id==2:
             self.dest_id = 0
-        else:
+        elif self.id==3:
             self.dest_id = 1
+        else:
+            raise ValueError("Invalid transition id: "+str(self.id))
     def check(self):
         if self.rect.collidepoint((player.x,player.y)):
             if self.id==0:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]-2))].level_id,(level.global_position[0],level.global_position[1]-2))
-                except AttributeError:
+                    run.intermediary.levelarray[str((global_position[0],global_position[1]-2))].load()
+                except KeyError:
                     level.load("test2")
-                    print("No valid level could be loaded at "+str(level.global_position[0])+", "+str(level.global_position[1]-2)+", so the default level was loaded")
+                    print("No valid level could be loaded at "+str(global_position[0])+", "+str(global_position[1]-2)+", so the default level was loaded")
             elif self.id==1:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0]+2,level.global_position[1]))].level_id,(level.global_position[0]+2,level.global_position[1]))
-                except AttributeError:
+                    run.intermediary.levelarray[str((global_position[0]+2,global_position[1]))].load()          
+                except KeyError:
                     level.load("test2")
-                    print("No valid level could be loaded at "+str(level.global_position[0]+2)+", "+str(level.global_position[1])+", so the default level was loaded")
+                    print("No valid level could be loaded at "+str(global_position[0]+2)+", "+str(global_position[1])+", so the default level was loaded")
             elif self.id==2:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]+2))].level_id,(level.global_position[0],level.global_position[1]+2))
-                except AttributeError:
+                    run.intermediary.levelarray[str((global_position[0],global_position[1]+2))].load()
+                except KeyError:
                     level.load("test2")
-                    print("No valid level could be loaded at "+str(level.global_position[0])+", "+str(level.global_position[1]+2)+", so the default level was loaded")
+                    print("No valid level could be loaded at "+str(global_position[0])+", "+str(global_position[1]+2)+", so the default level was loaded")
             elif self.id==3:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0]-2,level.global_position[1]))].level_id,(level.global_position[0]-2,level.global_position[1]))
-                except AttributeError:
+                    run.intermediary.levelarray[str((global_position[0]-2,global_position[1]))].load()
+                except KeyError:
                     level.load("test2")
-                    print("No valid level could be loaded at "+str(level.global_position[0]-2)+", "+str(level.global_position[1])+", so the default level was loaded")
+                    print("No valid level could be loaded at "+str(global_position[0]-2)+", "+str(global_position[1])+", so the default level was loaded")
             else:
                 raise ValueError("Invalid transition id")
             if len(level_transitions)==0:
-                raise ValueError("Destination level has no valid entrance")
+                raise ValueError("Destination level "+level.name+" has no valid entrance")
             for i in level_transitions:
                 if type(i)==DynamicTransitionObject:
                     if i.id==self.dest_id:
@@ -243,32 +253,36 @@ class Entity():
             self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm4.png"))))
             self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm5.png"))))
             self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm6.png"))))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm7.png"))))
-    
+            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm7.png")))) 
     def Draw(self):
         self.Animation(self)
     def collide(self,side="bottom"):
         collide = 0
         if side=="bottom":
             for i in range(0,self.hitbox.w):
-                if level.collision.get_at((self.hitbox.x+i,self.hitbox.y+self.hitbox.h-1))==1:
-                    collide +=1
+                if not out_of_bounds((self.hitbox.x+i,self.hitbox.y+self.hitbox.h-1)):
+                    if level.collision.get_at((self.hitbox.x+i,self.hitbox.y+self.hitbox.h-1))==1:
+                        collide +=1
         elif side=="grounded":
             for i in range(0,self.hitbox.w):
-                if level.collision.get_at((self.hitbox.x+i,self.hitbox.y+self.hitbox.h))==1:
-                    collide +=1
+                if not out_of_bounds((self.hitbox.x+i,self.hitbox.y+self.hitbox.h)):
+                    if level.collision.get_at((self.hitbox.x+i,self.hitbox.y+self.hitbox.h))==1:
+                        collide +=1
         elif side=="top":
             for i in range(0,self.hitbox.w):
-                if level.collision.get_at((self.hitbox.x+i,self.hitbox.y))==1:
-                    collide +=1
+                if not out_of_bounds((self.hitbox.x+i,self.hitbox.y)):
+                    if level.collision.get_at((self.hitbox.x+i,self.hitbox.y))==1:
+                        collide +=1
         elif side=="left":
             for i in range(1,self.hitbox.h-1):
-                if level.collision.get_at((self.hitbox.x,self.hitbox.y+i))==1:
-                    collide +=1
+                if not out_of_bounds((self.hitbox.x,self.hitbox.y+i)):
+                    if level.collision.get_at((self.hitbox.x,self.hitbox.y+i))==1:
+                        collide +=1
         elif side=="right":
             for i in range(1,self.hitbox.h-1):
-                if level.collision.get_at((self.hitbox.x+self.hitbox.w-1,self.hitbox.y+i))==1:
-                    collide +=1
+                if not out_of_bounds((self.hitbox.x+self.hitbox.w-1,self.hitbox.y+i)):
+                    if level.collision.get_at((self.hitbox.x+self.hitbox.w-1,self.hitbox.y+i))==1:
+                        collide +=1
         return collide
     def update_physics(self,up=False,left=False,right=False):
         self.iframes.Tick()
@@ -546,9 +560,11 @@ class UnloadedLevel():
         self.pos = pos
     def load(self):
         level.load(self.level_id)
-        level.global_position = self.pos
+        global global_position
+        global_position = [self.pos[0],self.pos[1]]
 class Level():
-    def load(self,levelname="test",globalposition=(0,0)):
+    def load(self,levelname="test"):
+        self.name = levelname
         path = open(os.path.join("assets","levels",levelname,"data.json"))
         data = json.load(path)                                                 #load level data.json
         self.display_texture = pygame.image.load(os.path.join("assets","levels",levelname,"display.png")) #load level, then scale it up on next line
@@ -582,7 +598,6 @@ class Level():
                 new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
         except:
             pass
-        self.global_position = globalposition
         k=0
         m=0
         boxrectlist = []                                                     #all this is the algorithm for making the boxes
@@ -733,7 +748,7 @@ class Map():
                     if self.map.get_at(point)==constants.MAP_BACKGROUND_COLOR:
                         break
                 self.secretrooms.append(Node(point,"secret",1,self))
-            self.map.blit(Map.GrowingTree(self.map),(0,0)) #generate the maze
+            self.map.blit(Map.GrowingTree(self.map,600),(0,0)) #generate the maze
             for i in self.secretrooms:                     #make sure secret rooms only have 1 tile connection
                 self.map.set_at(i.pos,constants.SECRET_ROOM_TILE_COLOR)
                 value = random.randint(0,3)
@@ -765,11 +780,45 @@ class Map():
             self.map.set_at((self.doorways[0].pos[0]+1,self.doorways[0].pos[1]),constants.PATH_TILE_COLOR)
             pygame.draw.rect(self.map,constants.PATH_TILE_COLOR,pygame.Rect(self.doorways[0].pos[0]-2,self.doorways[0].pos[1]-2,5,5),1)
             self.levelarray = {}
+            for i in range(1,int(self.map.get_width()/2)*2,2):
+                for j in range(1,int(self.map.get_height()/2)*2,2):
+                    if self.map.get_at((i,j))!=constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j))!=constants.SECRET_ROOM_TILE_COLOR:
+                        if self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("t_bottom",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("t_top",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("t_right",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("t_left",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("straight_y",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("straight_x",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("L_top_left",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("L_top_right",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("L_bottom_left",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("L_bottom_right",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("end_up",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("end_right",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("end_down",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("end_left",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("cross",(i,j))})
+                        else:
+                            raise ValueError("invalid level map shape at "+str(i)+", "+str(j))
             self.levelarray.update({str((self.doorways[0].pos[0],self.doorways[0].pos[1])):UnloadedLevel("start",self.doorways[0].pos)})
-            self.levelarray.update({str((self.doorways[0].pos[0]+2,self.doorways[0].pos[1])):UnloadedLevel("test",(self.doorways[0].pos[0]+2,self.doorways[0].pos[1]))})
             level.load("start")
-            level.global_position = (self.doorways[0].pos[0],self.doorways[0].pos[1])
-            print(self.levelarray)
+            global global_position
+            global_position = [self.doorways[0].pos[0],self.doorways[0].pos[1]]
 class Run():
     def __init__(self,difficulty,seed=0x00000000): #this object will be saved
         self.seed = seed
