@@ -73,32 +73,37 @@ class DynamicTransitionObject():
         if self.rect.collidepoint((player.x,player.y)):
             if self.id==0:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]-2))].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]-2))].level_id,(level.global_position[0],level.global_position[1]-2))
                 except AttributeError:
-                    level.load("test")
+                    level.load("test2")
                     print("No valid level could be loaded at "+str(level.global_position[0])+", "+str(level.global_position[1]-2)+", so the default level was loaded")
             elif self.id==1:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0]+2,level.global_position[1]))].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0]+2,level.global_position[1]))].level_id,(level.global_position[0]+2,level.global_position[1]))
                 except AttributeError:
-                    level.load("test")
+                    level.load("test2")
                     print("No valid level could be loaded at "+str(level.global_position[0]+2)+", "+str(level.global_position[1])+", so the default level was loaded")
             elif self.id==2:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]+2))].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0],level.global_position[1]+2))].level_id,(level.global_position[0],level.global_position[1]+2))
                 except AttributeError:
-                    level.load("test")
+                    level.load("test2")
                     print("No valid level could be loaded at "+str(level.global_position[0])+", "+str(level.global_position[1]+2)+", so the default level was loaded")
             elif self.id==3:
                 try:
-                    level.load(run.intermediary.levelarray[str((level.global_position[0]-2,level.global_position[1]))].level_id)
+                    level.load(run.intermediary.levelarray[str((level.global_position[0]-2,level.global_position[1]))].level_id,(level.global_position[0]-2,level.global_position[1]))
                 except AttributeError:
-                    level.load("test")
+                    level.load("test2")
                     print("No valid level could be loaded at "+str(level.global_position[0]-2)+", "+str(level.global_position[1])+", so the default level was loaded")
             else:
                 raise ValueError("Invalid transition id")
             if len(level_transitions)==0:
                 raise ValueError("Destination level has no valid entrance")
+            for i in level_transitions:
+                if type(i)==DynamicTransitionObject:
+                    if i.id==self.dest_id:
+                        player.x = i.dest[0]
+                        player.y = i.dest[1]
 class Button():
     def __init__(self,rect,path,index):
         self.rect = rect
@@ -316,7 +321,10 @@ class Entity():
         self.hitbox.x = self.x-self.texture_size[0]
         self.hitbox.y = self.y-self.texture_size[1]
         still_colliding = True
+        ticker = Ticker(100)
+        ticker.Trigger()
         while still_colliding:
+            ticker.Tick()
             still_colliding=False
             if self.collide("bottom")>=2:
                 self.collisions["bottom"]=True
@@ -369,6 +377,8 @@ class Entity():
                     self.grounded_ticks = 0
                 else:
                     self.grounded_ticks-=1
+            if not ticker.active:
+                raise RuntimeError("collision hang at "+str((self.x,self.y)))
         w_offset = -constants.screen_scale/2
         h_offset = -constants.screen_scale
         pos = (int((self.x-level.camera[0])*constants.screen_scale+w_offset),int((self.y-level.camera[1])*constants.screen_scale+h_offset))
@@ -538,7 +548,7 @@ class UnloadedLevel():
         level.load(self.level_id)
         level.global_position = self.pos
 class Level():
-    def load(self,levelname="test"):
+    def load(self,levelname="test",globalposition=(0,0)):
         path = open(os.path.join("assets","levels",levelname,"data.json"))
         data = json.load(path)                                                 #load level data.json
         self.display_texture = pygame.image.load(os.path.join("assets","levels",levelname,"display.png")) #load level, then scale it up on next line
@@ -562,7 +572,6 @@ class Level():
         try:
             for i in data["level_transitions"]:
                 if i["style"]=="old":
-                    print(i)
                     level_transitions.append(TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"])) #add level transitions
                 elif i["style"]=="new":
                     level_transitions.append(DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])))
@@ -573,8 +582,7 @@ class Level():
                 new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
         except:
             pass
-        self.global_position = (0,0)
-        print(level_transitions)
+        self.global_position = globalposition
         k=0
         m=0
         boxrectlist = []                                                     #all this is the algorithm for making the boxes
@@ -757,8 +765,11 @@ class Map():
             self.map.set_at((self.doorways[0].pos[0]+1,self.doorways[0].pos[1]),constants.PATH_TILE_COLOR)
             pygame.draw.rect(self.map,constants.PATH_TILE_COLOR,pygame.Rect(self.doorways[0].pos[0]-2,self.doorways[0].pos[1]-2,5,5),1)
             self.levelarray = {}
-            self.levelarray.update({str(self.doorways[0].pos),UnloadedLevel("start",self.doorways[0].pos)})
-            self.levelarray.update({str(self.doorways[0].pos),UnloadedLevel("test",(self.doorways[0].pos[0]+2,self.doorways[0].pos[1]))})
+            self.levelarray.update({str((self.doorways[0].pos[0],self.doorways[0].pos[1])):UnloadedLevel("start",self.doorways[0].pos)})
+            self.levelarray.update({str((self.doorways[0].pos[0]+2,self.doorways[0].pos[1])):UnloadedLevel("test",(self.doorways[0].pos[0]+2,self.doorways[0].pos[1]))})
+            level.load("start")
+            level.global_position = (self.doorways[0].pos[0],self.doorways[0].pos[1])
+            print(self.levelarray)
 class Run():
     def __init__(self,difficulty,seed=0x00000000): #this object will be saved
         self.seed = seed
@@ -767,5 +778,4 @@ class Run():
         self.intermediary = Map(self.seed)
 level = Level()
 run = Run(1,random.randbytes(16))
-level.load("start")
 player = Entity("player","player") #make the player
