@@ -80,7 +80,7 @@ def player_anim(self):
         
     else:
         constants.WIN.blit(arm_image,(self.hitbox.x,self.hitbox.y))
-    if keys[pygame.K_f]:
+    if keys[pygame.K_p]:
         game_classes.run = game_classes.Run(1,random.randbytes(16))
     if keys[pygame.K_g]:
         game_classes.level.hud.blit(pygame.transform.scale(game_classes.run.intermediary.map,(game_classes.run.intermediary.map.get_width()*(constants.screen_scale*2-1),game_classes.run.intermediary.map.get_height()*(constants.screen_scale*2-1))),(0,0))
