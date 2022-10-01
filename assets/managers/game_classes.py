@@ -29,7 +29,7 @@ def new_enemy(x,y,maxhp,type,xp=0):
                 break
             elif i==len(enemies)-1:
                 enemy.index = i+1
-                enemies.append(enemies)
+                enemies.append(enemy)
 def out_of_bounds(pos):
     oob = False
     if pos[0]<0 or pos[0]>constants.WIN.get_width()-1:
@@ -813,7 +813,10 @@ class Map():
                             self.levelarray.update({str((i,j)):UnloadedLevel("end_left",(i,j))})
                         elif self.map.get_at((i-1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i+1,j))==constants.PATH_TILE_COLOR and self.map.get_at((i,j-1))==constants.PATH_TILE_COLOR and self.map.get_at((i,j+1))==constants.PATH_TILE_COLOR:
                             self.levelarray.update({str((i,j)):UnloadedLevel("cross",(i,j))})
+                        elif self.map.get_at((i-1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i+1,j))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j-1))==constants.MAP_BACKGROUND_COLOR and self.map.get_at((i,j+1))==constants.MAP_BACKGROUND_COLOR:
+                            self.levelarray.update({str((i,j)):UnloadedLevel("empty",(i,j))})
                         else:
+                            print("up: "+str(self.map.get_at((i,j-1)))+", right: "+str(self.map.get_at((i+1,j)))+", down: "+str(self.map.get_at((i,j+1)))+", left: "+str(self.map.get_at((i-1,j))))
                             raise ValueError("invalid level map shape at "+str(i)+", "+str(j))
             self.levelarray.update({str((self.doorways[0].pos[0],self.doorways[0].pos[1])):UnloadedLevel("start",self.doorways[0].pos)})
             level.load("start")
