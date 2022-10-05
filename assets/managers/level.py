@@ -1,429 +1,22 @@
+from assets.managers import common
 from assets.managers import constants
-from assets.managers import ai
-from assets.managers import animation
-import random
-import math
-import pygame
-import os
-import json
-boxes = []
-level_transitions = []
-enemies = []
-global_position = [0,0]
-def new_enemy(x,y,maxhp,type,xp=0):
-    enemy = Entity(type,type,xp)
-    enemy.x = x
-    enemy.y = y
-    enemy.max_hp = maxhp
-    enemy.hp = maxhp
-    if type=="mite":
-        enemy.max_speed = constants.MAX_SPEED*1.4
-    enemy.update_physics()
-    if len(enemies)==0:
-        enemies.append(enemy)
-    else:
-        for i in range(len(enemies)):
-            if enemies[i]==None:
-                enemy.index = i
-                enemies[i] = enemy
-                break
-            elif i==len(enemies)-1:
-                enemy.index = i+1
-                enemies.append(enemy)
-def out_of_bounds(pos):
-    oob = False
-    if pos[0]<0 or pos[0]>constants.WIN.get_width()-1:
-        oob = True
-    if pos[1]<0 or pos[1]>constants.WIN.get_height()-1:
-        oob = True
-    return oob
-class Ticker():
-    def __init__(self,threshold):
-        self.threshold = threshold
-        self.tick = -1
-        self.active = False
-    def Tick(self,amount=1):
-        if self.tick>=0:
-            self.tick+=amount
-        if self.tick>=self.threshold:
-            self.tick = -1
-            self.active = False
-    def Trigger(self):
-        if self.tick==-1:
-            self.tick = 0
-            self.active = True
-    def Reset(self):
-        self.tick = -1
-class TransitionObject():
-    def __init__(self,rect,dest,dest_level):
-        self.rect = rect
-        self.dest = dest
-        self.dest_level = dest_level
-    def check(self):
-        if self.rect.collidepoint((player.x,player.y)):
-            level.load(self.dest_level)
-            player.x = self.dest[0]
-            player.y = self.dest[1]
-class DynamicTransitionObject():
-    def __init__(self,rect,id,dest):
-        self.rect = rect
-        self.id = id
-        self.dest = dest
-        if self.id==0:
-            self.dest_id = 2
-        elif self.id==1:
-            self.dest_id = 3
-        elif self.id==2:
-            self.dest_id = 0
-        elif self.id==3:
-            self.dest_id = 1
-        else:
-            raise ValueError("Invalid transition id: "+str(self.id))
-    def check(self):
-        if self.rect.collidepoint((player.x,player.y)):
-            if self.id==0:
-                try:
-                    run.intermediary.levelarray[str((global_position[0],global_position[1]-2))].load()
-                except KeyError:
-                    level.load("test2")
-                    print("No valid level could be loaded at "+str(global_position[0])+", "+str(global_position[1]-2)+", so the default level was loaded")
-            elif self.id==1:
-                try:
-                    run.intermediary.levelarray[str((global_position[0]+2,global_position[1]))].load()          
-                except KeyError:
-                    level.load("test2")
-                    print("No valid level could be loaded at "+str(global_position[0]+2)+", "+str(global_position[1])+", so the default level was loaded")
-            elif self.id==2:
-                try:
-                    run.intermediary.levelarray[str((global_position[0],global_position[1]+2))].load()
-                except KeyError:
-                    level.load("test2")
-                    print("No valid level could be loaded at "+str(global_position[0])+", "+str(global_position[1]+2)+", so the default level was loaded")
-            elif self.id==3:
-                try:
-                    run.intermediary.levelarray[str((global_position[0]-2,global_position[1]))].load()
-                except KeyError:
-                    level.load("test2")
-                    print("No valid level could be loaded at "+str(global_position[0]-2)+", "+str(global_position[1])+", so the default level was loaded")
-            else:
-                raise ValueError("Invalid transition id")
-            if len(level_transitions)==0:
-                raise ValueError("Destination level "+level.name+" has no valid entrance")
-            for i in level_transitions:
-                if type(i)==DynamicTransitionObject:
-                    if i.id==self.dest_id:
-                        player.x = i.dest[0]
-                        player.y = i.dest[1]
-class Button():
-    def __init__(self,rect,path,index):
-        self.rect = rect
-        self.path = path
-        self.text = pygame.image.load(os.path.join(constants.ui_path,path))
-        self.down_text = self.text.copy()
-        border_size = int(constants.screen_scale*1.2)
-        for i in range(self.down_text.get_width()):
-            for j in range(self.down_text.get_height()):
-                if self.down_text.get_at((i,j)) == (0,0x49,0xbf):
-                    self.down_text.set_at((i,j),(32,0x92,0xff))
-        self.text = pygame.transform.scale(self.text,(self.text.get_width()*constants.screen_scale,constants.BUTTONSIZE-constants.screen_scale*5))
-        self.down_text = pygame.transform.scale(self.down_text,(self.down_text.get_width()*constants.screen_scale,constants.BUTTONSIZE-constants.screen_scale*5))
-        self.surface = pygame.Surface((self.rect.w,self.rect.h))
-        self.down_surface = self.surface.copy()
-        pygame.draw.rect(self.surface,(0,0x49,0xbf),pygame.Rect(0,0,self.rect.w,self.rect.h))
-        pygame.draw.rect(self.surface,(0,1,0),pygame.Rect(border_size,border_size,self.rect.w-border_size*2,self.rect.h-border_size*2))
-        pygame.draw.rect(self.down_surface,(32,0x92,0xff),pygame.Rect(0,0,self.rect.w,self.rect.h))
-        pygame.draw.rect(self.down_surface,(64,64,64),pygame.Rect(border_size,border_size,self.rect.w-border_size*2,self.rect.h-border_size*2))
-        self.surface.blit(self.text,(self.rect.w/2-self.text.get_width()/2,border_size*2))
-        self.down_surface.blit(self.down_text,(self.rect.w/2-self.down_text.get_width()/2,border_size*2))
-        self.rect.x = (constants.menu_surface.get_width()/2)-(self.rect.w/2)
-        self.rect.y = constants.menu_surface.get_height()/8*(index*0.75+2)
-    def Draw(self):
-        if pygame.mouse.get_focused():
-            if self.rect.collidepoint(pygame.mouse.get_pos()):
-                constants.menu_surface.blit(self.down_surface,(self.rect.x,self.rect.y))
-            else:
-                constants.menu_surface.blit(self.surface,(self.rect.x,self.rect.y))
-        else:
-            constants.menu_surface.blit(self.surface,(self.rect.x,self.rect.y))
-class Entity():
-    def apply_pallet(self,surface):
-        for i in range(0,surface.get_width()):
-            for j in range(0,surface.get_height()):
-                if surface.get_at((i,j))==(128,0,0):
-                    surface.set_at((i,j),self.pallet.get_at((0,0)))
-                elif surface.get_at((i,j))==(255,0,0):
-                    surface.set_at((i,j),self.pallet.get_at((1,0)))
-                elif surface.get_at((i,j))==(255,128,0):
-                    surface.set_at((i,j),self.pallet.get_at((2,0)))
-                elif surface.get_at((i,j))==(255,255,0):
-                    surface.set_at((i,j),self.pallet.get_at((3,0)))
-                elif surface.get_at((i,j))==(128,128,0):
-                    surface.set_at((i,j),self.pallet.get_at((4,0)))
-                elif surface.get_at((i,j))==(0,128,0):
-                    surface.set_at((i,j),self.pallet.get_at((5,0)))
-                elif surface.get_at((i,j))==(0,255,0):
-                    surface.set_at((i,j),self.pallet.get_at((6,0)))
-                elif surface.get_at((i,j))==(0,255,128):
-                    surface.set_at((i,j),self.pallet.get_at((7,0)))
-                elif surface.get_at((i,j))==(0,128,128):
-                    surface.set_at((i,j),self.pallet.get_at((8,0)))
-        return surface
-    def kill(self):
-        enemies[self.index] = None
-    def damage(self,amount=1):
-        if not self.iframes.active:
-            self.hp-=amount
-            self.iframes.Trigger()
-            if self.hp<=0:
-                self.kill()
-    def check_level(self,xp):
-        level = 0
-        while xp>level*100:
-            level+=1
-        low_thresh = (level-1)*100
-        return (level,low_thresh,xp-low_thresh)
-    def __init__(self,AItype="simple",texturepath="player",xp=0):
-        self.iframes = Ticker(10)
-        self.ground_drag = constants.DEF_GROUND_DRAG
-        self.air_drag = constants.DEF_AIR_DRAG
-        self.grav = constants.DEF_GRAVITY
-        self.accel = constants.DEF_ACCEL
-        self.air_accel = constants.DEF_AIR_ACCEL
-        self.max_speed = constants.MAX_SPEED
-        self.max_fall = constants.MAX_FALL
-        self.jump = constants.DEF_JUMP
-        self.anim_flip = False
-        self.ai_type = AItype
-        self.index = 0
-        self.x = 0
-        self.y = 0
-        self.x_vel = 0
-        self.y_vel = 0
-        self.angle = 0
-        self.max_hp = constants.DEF_HP
-        self.hp = int(constants.DEF_HP/2)
-        self.grounded_ticks = 0
-        self.animation_ticks = Ticker(60)
-        self.pallet = None
-        self.texture_path = os.path.join("assets","sprites",texturepath)
-        self.texture = None
-        self.still_anim = None
-        self.walking_anim = []
-        self.falling_anim = []
-        self.collisions = {"left":False,"right":False,"top":False,"bottom":False}
-        self.has_jumped = False
-        self.texture_size = [constants.HALF_BLOCK_SIZE,constants.HALF_BLOCK_SIZE]
-        self.grounded = True
-        self.hitbox = pygame.Rect(-constants.HALF_BLOCK_SIZE,-constants.HALF_BLOCK_SIZE,constants.BLOCK_SIZE,constants.BLOCK_SIZE)
-        if AItype=="simple":
-            self.AIpointer = ai.simple
-            self.Animation = animation.simple
-        if AItype=="player":
-            self.AIpointer = ai.playerAI
-            self.Animation = animation.player_anim
-        if AItype=="mite":
-            self.AIpointer = ai.mite
-            self.Animation = animation.simple
-        self.overlay_active = False
-        self.xp = xp
-        self.overlay = level.camera_surface.copy()
-        self.overlay = pygame.transform.scale(self.overlay,(self.overlay.get_width()*3,self.overlay.get_height()*3))
-        self.overlay.set_alpha(96)
-        self.overlay.fill((0,0,0))
-        pygame.draw.circle(self.overlay,(24,24,24),(self.overlay.get_width()/2,self.overlay.get_height()/2),128)
-        pygame.draw.circle(self.overlay,(48,48,48),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
-        pygame.draw.circle(self.overlay,(72,72,72),(self.overlay.get_width()/2,self.overlay.get_height()/2),32)
-        self.pallet = pygame.image.load(os.path.join(self.texture_path,"pallet.png"))
-        self.still_anim = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"still.png")))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking1.png"))))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking2.png"))))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking3.png"))))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking4.png"))))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking5.png"))))
-        self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling1.png"))))
-        self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling2.png"))))
-        if self.ai_type=="player":
-            self.animation_ticks.threshold = 50
-            self.inventory = []
-            self.arm_anim = []
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm1.png"))))
-            self.arm_anim[0] = pygame.transform.scale(self.arm_anim[0],(self.arm_anim[0].get_width()*constants.screen_scale,self.arm_anim[0].get_height()*constants.screen_scale))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm2.png"))))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm3.png"))))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm4.png"))))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm5.png"))))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm6.png"))))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm7.png")))) 
-    def Draw(self):
-        self.Animation(self)
-    def collide(self,side="bottom"):
-        collide = 0
-        if side=="bottom":
-            for i in range(0,self.hitbox.w):
-                if not out_of_bounds((self.hitbox.x+i,self.hitbox.y+self.hitbox.h-1)):
-                    if level.collision.get_at((self.hitbox.x+i,self.hitbox.y+self.hitbox.h-1))==1:
-                        collide +=1
-        elif side=="grounded":
-            for i in range(0,self.hitbox.w):
-                if not out_of_bounds((self.hitbox.x+i,self.hitbox.y+self.hitbox.h)):
-                    if level.collision.get_at((self.hitbox.x+i,self.hitbox.y+self.hitbox.h))==1:
-                        collide +=1
-        elif side=="top":
-            for i in range(0,self.hitbox.w):
-                if not out_of_bounds((self.hitbox.x+i,self.hitbox.y)):
-                    if level.collision.get_at((self.hitbox.x+i,self.hitbox.y))==1:
-                        collide +=1
-        elif side=="left":
-            for i in range(1,self.hitbox.h-1):
-                if not out_of_bounds((self.hitbox.x,self.hitbox.y+i)):
-                    if level.collision.get_at((self.hitbox.x,self.hitbox.y+i))==1:
-                        collide +=1
-        elif side=="right":
-            for i in range(1,self.hitbox.h-1):
-                if not out_of_bounds((self.hitbox.x+self.hitbox.w-1,self.hitbox.y+i)):
-                    if level.collision.get_at((self.hitbox.x+self.hitbox.w-1,self.hitbox.y+i))==1:
-                        collide +=1
-        return collide
-    def update_physics(self,up=False,left=False,right=False):
-        self.iframes.Tick()
-        if not (right or left):
-            if self.grounded:
-                self.x_vel *= self.ground_drag
-            else:
-                self.x_vel *= self.air_drag
-        new_y_vel = self.y_vel + self.grav
-        if not new_y_vel>=self.max_fall and not self.grounded:
-            self.y_vel = new_y_vel
-        if self.x_vel > self.max_speed:
-            self.x_vel = self.max_speed
-        if self.x_vel < -1*self.max_speed:
-            self.x_vel = -1*self.max_speed
-        if up and self.grounded_ticks>=-3 and self.has_jumped==False:
-            self.y_vel -= self.jump
-            self.has_jumped = True
-            if self.y_vel>=self.jump:
-                self.y_vel = -self.jump
-        elif left and self.x_vel>-self.max_speed:
-            if self.grounded:
-                self.x_vel -= self.accel
-            else:
-                self.x_vel -= self.air_accel
-        elif right and self.x_vel<self.max_speed:
-            if self.grounded:
-                self.x_vel += self.accel
-            else:
-                self.x_vel += self.air_accel
-        if self.x+self.x_vel-(self.hitbox.w/2)<0:
-            self.x=self.hitbox.w/2
-            self.x_vel=0
-        elif self.x+self.x_vel+(self.hitbox.w/2)>level.collision_texture.get_width():
-            self.x=level.collision_texture.get_width()-(self.hitbox.w/2)
-            self.x_vel=0
-        else:
-            self.x += self.x_vel
-        if self.y+self.y_vel-(self.hitbox.h/2)<0:
-            self.y=self.hitbox.h/2
-            self.y_vel=0
-        elif self.y+self.y_vel+(self.hitbox.h/2)>level.collision_texture.get_height():
-            self.y=level.collision_texture.get_height()-(self.hitbox.h/2)
-            self.y_vel=0
-        else:
-            self.y += self.y_vel
-        
-        if self.x_vel<=0.01 and self.x_vel>=-0.01:
-            self.x_vel = 0
-        self.hitbox.x = self.x-self.texture_size[0]
-        self.hitbox.y = self.y-self.texture_size[1]
-        still_colliding = True
-        ticker = Ticker(100)
-        ticker.Trigger()
-        while still_colliding:
-            ticker.Tick()
-            still_colliding=False
-            if self.collide("bottom")>=2:
-                self.collisions["bottom"]=True
-                self.y-=1
-                self.hitbox.y-=1
-                still_colliding=True
-                if self.y_vel>0:
-                    self.y_vel=0
-            else:
-                self.collisions["bottom"]=False
-            if self.collide("top")>=2:
-                self.collisions["top"]=True
-                self.y+=1
-                self.hitbox.y+=1
-                still_colliding=True
-                if self.y_vel<0:
-                    self.y_vel=0
-            else:
-                self.collisions["top"]=False
-            if self.collide("left")>=2:
-                self.collisions["left"]=True
-                self.x+=1
-                self.hitbox.x+=1
-                still_colliding=True
-                if self.x_vel>0:
-                    self.x_vel=0
-            elif not self.grounded:
-                self.collisions["left"]=False
-            if self.collide("right")>=2:
-                self.collisions["right"]=True
-                self.x-=1
-                self.hitbox.x-=1
-                still_colliding=True
-                if self.x_vel<0:
-                    self.x_vel=0
-            elif not self.grounded:
-                self.collisions["right"]=False
-            if self.collide("grounded")>=1:
-                self.grounded = True
-                self.has_jumped = False
-            else:
-                self.grounded = False
-            if self.grounded:
-                if self.grounded_ticks<0:
-                    self.grounded_ticks = 0
-                else:
-                    self.grounded_ticks+=1
-            else:
-                if self.grounded_ticks>0:
-                    self.grounded_ticks = 0
-                else:
-                    self.grounded_ticks-=1
-            if not ticker.active:
-                raise RuntimeError("collision hang at "+str((self.x,self.y)))
-        w_offset = -constants.screen_scale/2
-        h_offset = -constants.screen_scale
-        pos = (int((self.x-level.camera[0])*constants.screen_scale+w_offset),int((self.y-level.camera[1])*constants.screen_scale+h_offset))
-        angle = math.degrees(math.atan((pygame.mouse.get_pos()[1]-pos[1])/(int(pygame.mouse.get_pos()[0]-pos[0])+0.1)))
-        if pos[0]<=pygame.mouse.get_pos()[0]:
-            angle -=180
-        angle+=180
-        self.angle = angle
-class Item():
-    def __init__(self,id,type,texture,on_use,cooldown):
-        self.id = id
-        self.type = type
-        self.cooldown = cooldown
-        self.texture = pygame.image.load(os.path.join(constants.ITEM_PATH,texture))
-        self.texture = pygame.transform.scale(self.texture,(self.texture.get_width()*constants.screen_scale,self.texture.get_height()*constants.screen_scale))
-        self.on_use = on_use
+from assets.managers import entity
+import os,random,json,pygame
 class Box():
     def __init__(self,rect):
         self.rect = rect
         self.hidden = False
     def Draw(self,forcedraw=False):
         if not self.hidden or forcedraw: #check wheter or not the box is hidden, or if its being forced to draw
-            neg_player_y = int(-player.y+4)  #unflip player y and the rect y positions
-            player_x = int(player.x)+0.5
-            player_y = int(player.y-4)
+            neg_player_y = int(-common.player.y+4)  #unflip player y and the rect y positions
+            player_x = int(common.player.x)+0.5
+            player_y = int(common.player.y-4)
             point9 = None
-            camera_height = level.camera_surface.get_height() #get camera values, used to keep the drawn polygons onscreen
-            camera_width = level.camera_surface.get_width()
-            camera_x = level.camera_surface.get_offset()[0]
-            camera_y = level.camera_surface.get_offset()[1]
-            e = level.camera_surface.get_rect() #prepare for checking whether or not the box is onscreen
+            camera_height = common.loaded_level.camera_surface.get_height() #get camera values, used to keep the drawn polygons onscreen
+            camera_width = common.loaded_level.camera_surface.get_width()
+            camera_x = common.loaded_level.camera_surface.get_offset()[0]
+            camera_y = common.loaded_level.camera_surface.get_offset()[1]
+            e = common.loaded_level.camera_surface.get_rect() #prepare for checking whether or not the box is onscreen
             e.x = camera_x
             e.y = camera_y
             x = self.rect.x
@@ -442,10 +35,10 @@ class Box():
                 if player_x>x2: #prepare some x positions for the screen edges
                     x_value_1 = camera_x
                     x_value_2 = camera_x
-                elif player_x>x and player.y>y2:
+                elif player_x>x and common.player.y>y2:
                     x_value_1 = camera_width+camera_x
                     x_value_2 = camera_x
-                elif player_x>x and player.y<y:
+                elif player_x>x and common.player.y<y:
                     x_value_1 = camera_x
                     x_value_2 = camera_width+camera_x
                 else:
@@ -559,10 +152,13 @@ class UnloadedLevel():
         self.level_id = level_id
         self.pos = pos
     def load(self):
-        level.load(self.level_id)
-        global global_position
-        global_position = [self.pos[0],self.pos[1]]
+        common.loaded_level.load(self.level_id)
+        common.global_position = [self.pos[0],self.pos[1]]
 class Level():
+    def __init__(self):
+        self.name = "simple"
+        self.camera_surface = constants.WIN.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT)
+        self.camera = [0,0]
     def load(self,levelname="test"):
         self.name = levelname
         path = open(os.path.join("assets","levels",levelname,"data.json"))
@@ -577,25 +173,26 @@ class Level():
         self.camera_surface = constants.WIN.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT) #make the camera, which is a subsurface of the level surface
         self.hud = pygame.surface.Surface((constants.disp_win.get_width(),constants.disp_win.get_height())) #make a hud, where hp and such will go
         self.hud.set_colorkey((0,0,0,255)) #allow hud to be transparent
-        boxes.clear()                      #clear out various lists, in case they have stuff left over from the previous level
-        level_transitions.clear()
-        enemies.clear()
+        common.boxes.clear()                      #clear out various lists, in case they have stuff left over from the previous level
+        common.level_transitions.clear()
+        common.enemies.clear()
+        common.projectiles.clear()
         try:
             for i in data["boxes"]:
-                boxes.append(Box(pygame.Rect(i["x"],i["y"],i["w"],i["h"]))) #add extra boxes w/o collision
+                common.boxes.append(Box(pygame.Rect(i["x"],i["y"],i["w"],i["h"]))) #add extra boxes w/o collision
         except:
             pass
         try:
             for i in data["level_transitions"]:
                 if i["style"]=="old":
-                    level_transitions.append(TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"])) #add level transitions
+                    common.level_transitions.append(entity.TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"])) #add level transitions
                 elif i["style"]=="new":
-                    level_transitions.append(DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])))
+                    common.level_transitions.append(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])))
         except:
             pass
         try:
             for i in data["enemies"]:
-                new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
+                entity.new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
         except:
             pass
         k=0
@@ -633,13 +230,13 @@ class Level():
                     if not (newbox.w==0 or newbox.h==0): #check that the rect isnt invalid
                         boxrectlist.append(newbox)       #then add the box
         for i in boxrectlist:     #for every rect in the box list, make an actual Box class
-            boxes.append(Box(i))
+            common.boxes.append(Box(i))
     def update_camera(self,pos=None):
         if pos!=None:                #make a hook for placing the camera wherever
             self.camera[0] = pos[0]
             self.camera[1] = pos[1]
         else:
-            self.camera = [int(player.x-(constants.CAM_WIDTH/2)),int(player.y-(constants.CAM_HEIGHT/2))] #set the camera to put the player in the middle
+            self.camera = [int(common.player.x-(constants.CAM_WIDTH/2)),int(common.player.y-(constants.CAM_HEIGHT/2))] #set the camera to put the player in the middle
         if self.camera[0]<=0:          #constrain the camera to within the level borders, else game crash
             self.camera[0] = 0
         if self.camera[0]+constants.CAM_WIDTH>=constants.WIN.get_width():
@@ -819,15 +416,11 @@ class Map():
                             print("up: "+str(self.map.get_at((i,j-1)))+", right: "+str(self.map.get_at((i+1,j)))+", down: "+str(self.map.get_at((i,j+1)))+", left: "+str(self.map.get_at((i-1,j))))
                             raise ValueError("invalid level map shape at "+str(i)+", "+str(j))
             self.levelarray.update({str((self.doorways[0].pos[0],self.doorways[0].pos[1])):UnloadedLevel("start",self.doorways[0].pos)})
-            level.load("start")
-            global global_position
-            global_position = [self.doorways[0].pos[0],self.doorways[0].pos[1]]
+            common.loaded_level.load("start")
+            common.global_position = [self.doorways[0].pos[0],self.doorways[0].pos[1]]
 class Run():
     def __init__(self,difficulty,seed=0x00000000): #this object will be saved
         self.seed = seed
         random.seed(self.seed)
         self.difficulty = difficulty
         self.intermediary = Map(self.seed)
-level = Level()
-run = Run(1,random.randbytes(16))
-player = Entity("player","player") #make the player

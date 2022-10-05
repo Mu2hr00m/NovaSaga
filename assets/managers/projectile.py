@@ -1,21 +1,20 @@
 import pygame
 from assets.managers import constants
-from assets.managers import game_classes
+from assets.managers import common
 import math
 import os
-projectiles = []
 def new_projectile(projectile):
-    if len(projectiles)==0:
-        projectiles.append(projectile)
+    if len(common.projectiles)==0:
+        common.projectiles.append(projectile)
     else:
-        for i in range(len(projectiles)):
-            if projectiles[i]==None:
+        for i in range(len(common.projectiles)):
+            if common.projectiles[i]==None:
                 projectile.index = i
-                projectiles[i] = projectile
+                common.projectiles[i] = projectile
                 break
-            elif i==len(projectiles)-1:
+            elif i==len(common.projectiles)-1:
                 projectile.index = i+1
-                projectiles.append(projectile)
+                common.projectiles.append(projectile)
 class Bullet():
     def __init__(self,x,y,angle,texture,speed,damage,pierce=0,bounce=0,gravity=constants.DEF_GRAVITY/3):
         self.x = x
@@ -32,7 +31,7 @@ class Bullet():
         self.gravity = gravity
         self.damage_ticks = 0
     def kill(self):
-        projectiles[self.index]=None
+        common.projectiles[self.index]=None
     def update(self):
         if self.y_vel>10:
             self.y_vel=10
@@ -46,11 +45,11 @@ class Bullet():
             for i in range(self.speed):
                 x=x_step*i+self.x
                 y=y_step*i+self.y
-                if game_classes.level.collision.get_at((x,y))==1:
-                    if game_classes.level.collision.get_at((x,y+1))==1 and game_classes.level.collision.get_at((x,y-1))==1:
+                if common.loaded_level.collision.get_at((x,y))==1:
+                    if common.loaded_level.collision.get_at((x,y+1))==1 and common.loaded_level.collision.get_at((x,y-1))==1:
                         x_step*=-1
                         self.x_vel=self.x_vel/2*-1
-                    if game_classes.level.collision.get_at((x+1,y))==1 and game_classes.level.collision.get_at((x-1,y))==1:
+                    if common.loaded_level.collision.get_at((x+1,y))==1 and common.loaded_level.collision.get_at((x-1,y))==1:
                         y_step*=-1
                         self.y_vel*=-1
                         if self.y_vel<0:
@@ -65,7 +64,7 @@ class Bullet():
             self.y+=total_y
         else:
             self.kill()
-        for i in game_classes.enemies:
+        for i in common.enemies:
             if i!=None:
                 if i.hitbox.collidepoint((self.x,self.y)):
                     i.damage(self.damage)

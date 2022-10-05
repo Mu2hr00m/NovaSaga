@@ -1,5 +1,4 @@
 import pygame
-import time
 import os
 pygame.font.init()
 BLOCK_SIZE = 8
@@ -11,8 +10,8 @@ BLOCK_HEIGHT = 24
 CAM_WIDTH = BLOCK_WIDTH * BLOCK_SIZE
 CAM_HEIGHT = BLOCK_HEIGHT * BLOCK_SIZE
 WIDTH, HEIGHT = BLOCK_SIZE * BLOCK_WIDTH, BLOCK_SIZE * BLOCK_HEIGHT
+INV_WIDTH, INV_HEIGHT = 5,2
 screen_scale = 4
-menu = "main"
 DEF_FONT = pygame.font.Font(None, 5*screen_scale)
 DEF_GRAVITY = 0.12
 DEF_GROUND_DRAG = 0.8
@@ -28,8 +27,6 @@ DEF_HP = 20
 BUTTONSIZE = 12*screen_scale
 ITEM_PATH = os.path.join("assets","sprites","items")
 PROJ_PATH = os.path.join("assets","sprites","projectile")
-realclock = time.time()
-tick=0
 ui_path = os.path.join("assets","managers","menu_ui")
 disp_win = pygame.display.set_mode((WIDTH*screen_scale,HEIGHT*screen_scale))
 WIN = pygame.transform.scale(disp_win.copy(),(WIDTH,HEIGHT))
@@ -51,3 +48,5 @@ AWAKENING_TILE_COLOR = (128,255,128)
 AURIC_DOOR_TILE_COLOR = (64,255,0)
 SECRET_ROOM_TILE_COLOR = (255,128,0)
 PATH_TILE_COLOR = (0,1,0)
+DEFKEYBINDS = {"left":pygame.K_a,"right":pygame.K_d,"jump":pygame.K_w,"action1":"lclick","action2":"rclick","action3":pygame.K_q,"inventory":pygame.K_e}
+DEF_SETTINGS = {"keybinds":DEFKEYBINDS}
