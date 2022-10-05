@@ -1,2 +1,2 @@
-# NovaSaga
-Agame, coded using Python
+# Nova Saga
+A game, coded using Python
