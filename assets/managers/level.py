@@ -162,11 +162,24 @@ class Level():
     def load(self,levelname="test"):
         self.name = levelname
         path = open(os.path.join("assets","levels",levelname,"data.json"))
-        data = json.load(path)                                                 #load level data.json
-        self.display_texture = pygame.image.load(os.path.join("assets","levels",levelname,"display.png")) #load level, then scale it up on next line
-        self.display_texture = pygame.transform.scale(self.display_texture,(self.display_texture.get_width()*data["level_scale"],self.display_texture.get_height()*data["level_scale"]))
-        self.collision_texture = pygame.image.load(os.path.join("assets","levels",levelname,"display.png")) #load collision map, then scale it up on next line
-        self.collision_texture = pygame.transform.scale(self.collision_texture,(self.collision_texture.get_width()*data["level_scale"],self.collision_texture.get_height()*data["level_scale"]))
+        if os.path.exists(os.path.join("assets","levels",levelname,"data.json")):
+            data = json.load(path)      #load level data.json, next few lines load collision and display from one or both files
+        else:
+            raise FileNotFoundError("the \'data\' file for "+levelname+" could not be found")
+        if [os.path.exists(os.path.join("assets","levels",levelname,"display.png")) and os.path.exists(os.path.join("assets","levels",levelname,"collision.png"))]==[False,False]:
+            raise FileNotFoundError("both the \'collision\' and \'display\' files are missing from "+levelname+", at least one must be present")
+        elif not os.path.exists(os.path.join("assets","levels",levelname,"display.png")): #load from collision file if display file doesnt exist
+            self.display_texture = pygame.image.load(os.path.join("assets","levels",levelname,"collision.png"))
+            self.display_texture = pygame.transform.scale(self.display_texture,(self.display_texture.get_width()*data["level_scale"],self.display_texture.get_height()*data["level_scale"]))
+            self.collision_texture = self.display_texture.copy()
+        elif not os.path.exists(os.path.join("assets","levels",levelname,"collision.png")): #load from display file if collision file doesnt exist
+            self.display_texture = pygame.image.load(os.path.join("assets","levels",levelname,"display.png"))
+            self.display_texture = pygame.transform.scale(self.display_texture,(self.display_texture.get_width()*data["level_scale"],self.display_texture.get_height()*data["level_scale"]))
+            self.collision_texture = self.display_texture.copy()
+        else: #if both files are present, load normally
+            self.display_texture = pygame.image.load(os.path.join("assets","levels",levelname,"display.png"))
+            self.collision_texture = pygame.image.load(os.path.join("assets","levels",levelname,"collision.png"))
+            self.collision_texture = pygame.transform.scale(self.collision_texture,(self.collision_texture.get_width()*data["level_scale"],self.collision_texture.get_height()*data["level_scale"]))
         self.collision = pygame.mask.from_surface(self.collision_texture) #make collision
         self.camera = [0,0]                                               #make camera
         constants.WIN = pygame.transform.scale(constants.WIN,(self.display_texture.get_size())) #make the main level surface from the display texture

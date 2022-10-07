@@ -29,7 +29,7 @@ def player_anim(self):
         self.animation_ticks.Tick()
         if x_vel==0:
             self.animation_ticks.Reset()
-        elif self.animation_ticks.tick<=15:
+        elif self.animation_ticks.tick<=15 and common.loaded_level.collision.get_at((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2))!=0 and common.loaded_level.collision.get_at((self.hitbox.x+self.hitbox.w+1,self.hitbox.y+self.hitbox.h-2))!=0:
             image = self.walking_anim[0]
             arm_image = self.arm_anim[2]
         elif x_vel<self.accel:
@@ -55,19 +55,18 @@ def player_anim(self):
             image = self.falling_anim[0]
             arm_image = self.arm_anim[5]
             self.animation_ticks.tick = 1
-    if self.anim_flip:
-        image = pygame.transform.flip(image,True,False)
-        if not pygame.mouse.get_pressed(5)[0]:
-            arm_image = pygame.transform.flip(arm_image,True,False)
     #print(str(self.animation_ticks)+", "+str(self.x_vel))
-    constants.WIN.blit(image,(self.hitbox.x,self.hitbox.y))
-    if pygame.mouse.get_focused()and pygame.mouse.get_pressed(5)[0]:
+    if pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]:
         arm_image = self.arm_anim[0]
         arm_image.blit(self.inventory["main_0"].texture,(int((arm_image.get_width()-constants.screen_scale)/2),int((arm_image.get_height()-constants.screen_scale)/2)))
         angle = self.angle
         w_offset = -constants.screen_scale/2
-        h_offset = -constants.screen_scale
+        h_offset = -constants.screen_scale*1.5
         pos = (int((self.x-common.loaded_level.camera[0])*constants.screen_scale+w_offset),int((self.y-common.loaded_level.camera[1])*constants.screen_scale+h_offset))
+        if pygame.mouse.get_pos()[0]<pos[0]:
+            self.anim_flip = True
+        else:
+            self.anim_flip = False
         angle-=180
         if not pos[0]<=pygame.mouse.get_pos()[0]:
             arm_image = pygame.transform.flip(arm_image,True,False)
@@ -77,8 +76,16 @@ def player_anim(self):
         pos = (pos[0]-arm_image.get_width()/2,pos[1]-arm_image.get_height()/2)
         common.loaded_level.hud.blit(arm_image,pos)
     else:
-        constants.WIN.blit(arm_image,(self.hitbox.x,self.hitbox.y))
+        if self.anim_flip:
+            arm_image = pygame.transform.flip(arm_image,True,False)
+    if self.anim_flip:
+        image = pygame.transform.flip(image,True,False)
+    constants.WIN.blit(image,(self.hitbox.x,self.hitbox.y+1))
+    if not (pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]):
+        constants.WIN.blit(arm_image,(self.hitbox.x,self.hitbox.y+1))
     if keys[pygame.K_p]:
         common.run = level.Run(1,random.randbytes(16))
     if keys[pygame.K_g]:
         common.loaded_level.hud.blit(pygame.transform.scale(common.run.intermediary.map,(common.run.intermediary.map.get_width()*(constants.screen_scale*2-1),common.run.intermediary.map.get_height()*(constants.screen_scale*2-1))),(0,0))
+    if keys[pygame.K_h]:
+        common.Font("nova",pygame.Rect(200,200,1,1),"hello world")

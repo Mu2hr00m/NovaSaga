@@ -50,3 +50,6 @@ SECRET_ROOM_TILE_COLOR = (255,128,0)
 PATH_TILE_COLOR = (0,1,0)
 DEFKEYBINDS = {"left":pygame.K_a,"right":pygame.K_d,"jump":pygame.K_w,"action1":"lclick","action2":"rclick","action3":pygame.K_q,"inventory":pygame.K_e}
 DEF_SETTINGS = {"keybinds":DEFKEYBINDS}
+FONT_PATH = os.path.join("assets","managers","font")
+CHAR_COLORS = {"default":(128,128,128),"nova":(192,128,255)}
+CHAR_COLORS.setdefault("default")
