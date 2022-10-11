@@ -9,7 +9,7 @@ class Box():
     def Draw(self,forcedraw=False):
         if not self.hidden or forcedraw: #check wheter or not the box is hidden, or if its being forced to draw
             neg_player_y = int(-common.player.y+4)  #unflip player y and the rect y positions
-            player_x = int(common.player.x)+0.5
+            player_x = int(common.player.x)+0.1
             player_y = int(common.player.y-4)
             point9 = None
             camera_height = common.loaded_level.camera_surface.get_height() #get camera values, used to keep the drawn polygons onscreen

@@ -36,6 +36,7 @@ class Entity():
         return (level,low_thresh,xp-low_thresh)
     def __init__(self,AItype="simple",texturepath="player",xp=0):
         self.iframes = common.Ticker(10)
+        self.has_control = True
         self.ground_drag = constants.DEF_GROUND_DRAG
         self.air_drag = constants.DEF_AIR_DRAG
         self.grav = constants.DEF_GRAVITY
@@ -82,8 +83,8 @@ class Entity():
         self.overlay.set_alpha(96)
         self.overlay.fill((0,0,0))
         pygame.draw.circle(self.overlay,(24,24,24),(self.overlay.get_width()/2,self.overlay.get_height()/2),128)
-        pygame.draw.circle(self.overlay,(48,48,48),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
-        pygame.draw.circle(self.overlay,(72,72,72),(self.overlay.get_width()/2,self.overlay.get_height()/2),32)
+        pygame.draw.circle(self.overlay,(40,40,40),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
+        pygame.draw.circle(self.overlay,(64,64,64),(self.overlay.get_width()/2,self.overlay.get_height()/2),32)
         self.pallet = pygame.image.load(os.path.join(self.texture_path,"pallet.png"))
         self.still_anim = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"still.png")),self.pallet)
         self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking1.png")),self.pallet))

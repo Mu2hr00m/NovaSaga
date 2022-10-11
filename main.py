@@ -10,7 +10,7 @@ from assets.managers import ai
 from assets.managers import menus
 from assets.managers import items
 from assets.managers import projectile
-from assets.managers import level
+from assets.managers import level,cutscene
 def abs(num):
     if num<0:
         num *= -1
@@ -29,18 +29,19 @@ def draw():
     for i in common.projectiles:
         if i!=None:
             i.draw()
-    if common.player.overlay_active:
-        constants.WIN.blit(common.player.overlay,(common.player.x-(constants.CAM_WIDTH*1.5),common.player.y-(constants.CAM_HEIGHT*1.5)))
     for box in common.boxes:
         box.Draw()
     constants.WIN.blit(common.loaded_level.display_texture,(0,0))
+    if common.player.overlay_active:
+        constants.WIN.blit(common.player.overlay,(common.player.x-(constants.CAM_WIDTH*1.5)-1,common.player.y-(constants.CAM_HEIGHT*1.5)))
     #for box in game_classes.boxes:
         #box.afterdraw()
     for i in common.level_transitions:
         pygame.draw.rect(constants.WIN,(128,128,128),i.rect)
     common.player.Draw()
     pygame.transform.scale(common.loaded_level.camera_surface,(constants.WIDTH*constants.screen_scale,constants.HEIGHT*constants.screen_scale),constants.disp_win)
-    common.loaded_level.hud.blit(constants.DEF_FONT.render("FPS: "+str(common.tick),False,(128,64,192)),(constants.screen_scale,13*constants.screen_scale))
+    #common.loaded_level.hud.blit(constants.DEF_FONT.render("FPS: "+str(common.tick),False,(128,64,192)),(constants.screen_scale,13*constants.screen_scale))
+    common.Font("nova",pygame.Rect((constants.screen_scale,13*constants.screen_scale,8,30)),"fps: "+str(common.tick))
     constants.disp_win.blit(common.loaded_level.hud,(0,0))
     pygame.display.update()
 def main():

@@ -1,7 +1,7 @@
 import pygame
-from assets.managers import constants,common,level
+from assets.managers import constants,common,level,cutscene
 import random
-import math
+import math,os
 def simple(self):
     pygame.draw.rect(constants.WIN,(0,128,128),self.hitbox)
 def player_anim(self):
@@ -29,9 +29,10 @@ def player_anim(self):
         self.animation_ticks.Tick()
         if x_vel==0:
             self.animation_ticks.Reset()
-        elif self.animation_ticks.tick<=15 and common.loaded_level.collision.get_at((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2))!=0 and common.loaded_level.collision.get_at((self.hitbox.x+self.hitbox.w+1,self.hitbox.y+self.hitbox.h-2))!=0:
-            image = self.walking_anim[0]
-            arm_image = self.arm_anim[2]
+        elif self.animation_ticks.tick<=15 and not common.out_of_bounds((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2)):
+            if common.loaded_level.collision.get_at((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2))!=0 and common.loaded_level.collision.get_at((self.hitbox.x+self.hitbox.w+1,self.hitbox.y+self.hitbox.h-2))!=0:
+                image = self.walking_anim[0]
+                arm_image = self.arm_anim[2]
         elif x_vel<self.accel:
             image = self.walking_anim[4]
             arm_image = self.arm_anim[2]
@@ -84,8 +85,11 @@ def player_anim(self):
     if not (pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]):
         constants.WIN.blit(arm_image,(self.hitbox.x,self.hitbox.y+1))
     if keys[pygame.K_p]:
-        common.run = level.Run(1,random.randbytes(16))
+        common.run = level.Run(0,os.urandom(16))
     if keys[pygame.K_g]:
         common.loaded_level.hud.blit(pygame.transform.scale(common.run.intermediary.map,(common.run.intermediary.map.get_width()*(constants.screen_scale*2-1),common.run.intermediary.map.get_height()*(constants.screen_scale*2-1))),(0,0))
     if keys[pygame.K_h]:
-        common.Font("nova",pygame.Rect(200,200,1,1),"hello world")
+        #common.Font("nova",pygame.Rect(200,200,1,1),"hello world")
+        cutscene.e.update()
+    else:
+        cutscene.e.close()

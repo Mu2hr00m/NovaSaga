@@ -89,7 +89,7 @@ def title():
         if pygame.mouse.get_pressed(5)[0]:
             if title_ui[2].rect.collidepoint(pygame.mouse.get_pos()):
                 common.menu = None
-                common.run = level.Run(0,500)
+                common.run = level.Run(0,os.urandom(16))
                 menu_ticks.Trigger()
             elif title_ui[3].rect.collidepoint(pygame.mouse.get_pos()):
                 print("settings not implemented")

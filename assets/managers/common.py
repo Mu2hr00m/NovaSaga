@@ -11,12 +11,21 @@ class Ticker():
         if self.tick>=self.threshold:
             self.tick = -1
             self.active = False
+    def SafeTick(self,amount=1):
+        if self.tick>=0 and self.tick<self.threshold:
+            self.tick+=amount
+    def Loop(self,amount=1):
+        if self.tick>=0:
+            self.tick+=amount
+        if self.tick>=self.threshold:
+            self.tick = 0
     def Trigger(self):
         if self.tick==-1:
             self.tick = 0
             self.active = True
     def Reset(self):
         self.tick = -1
+        self.active = False
 def GetPressed(control):
     Key = Keybinds[control]
     if type(Key)==str:
@@ -56,18 +65,24 @@ def out_of_bounds(pos):
     if pos[1]<0 or pos[1]>constants.WIN.get_height()-1:
         oob = True
     return oob
-def Font(color,rect=pygame.Rect,text=str):
+def Font(color,rect=pygame.Rect,text=str,size=1):
     cur_pos = [rect.x,rect.y]
-    base = small_font["scaled"].copy()
+    base = small_font["scaled_"+str(size)].copy()
+    for i in base:
+        base[i]=base[i].copy()
     if type(color)==str:
-        color=constants.CHAR_COLORS.get(color)
+        color=constants.CHAR_COLORS.get(color,constants.CHAR_COLORS["default"])
     for i in base:
         arr = pygame.PixelArray(base[i])
         arr.replace((255,255,255),color)
         arr.close()
     for i in text:
-        loaded_level.hud.blit(base.get(i,base["def"]),cur_pos)
-        cur_pos[0]+=6*constants.screen_scale
+        if i=="\n":
+            cur_pos[1]+=8*constants.screen_scale/2*size
+            cur_pos[0]=rect.x
+        else:
+            loaded_level.hud.blit(base.get(i,base["def"]),cur_pos)
+            cur_pos[0]+=6*constants.screen_scale/2*size
 Settings = None
 Keybinds = None
 enemies = []
@@ -80,7 +95,7 @@ global_position = (0,0)
 run = None
 tick = 0
 realclock = time.time()
-small_font = {"origin":{},"scaled":{}}
+small_font = {"origin":{},"scaled_1":{},"scaled_2":{},"scaled_3":{}}
 menu = "main"
 text = "abcdefghijklmnopqrstuvwxyz0123456789_!()[]{}#+-=~"
 for i in text:
@@ -98,4 +113,8 @@ small_font["origin"].update({"?":pygame.image.load(os.path.join(constants.FONT_P
 small_font["origin"].update({"\"":pygame.image.load(os.path.join(constants.FONT_PATH,"_quotes_.png"))})
 small_font["origin"].update({"def":pygame.image.load(os.path.join(constants.FONT_PATH,"_unknown_.png"))})
 for i in small_font["origin"]:
-    small_font["scaled"].update({i:pygame.transform.scale(small_font["origin"][i],(5*constants.screen_scale,7*constants.screen_scale))})
+    small_font["scaled_1"].update({i:pygame.transform.scale(small_font["origin"][i],(5*constants.screen_scale/2,7*constants.screen_scale/2))})
+for i in small_font["origin"]:
+    small_font["scaled_2"].update({i:pygame.transform.scale(small_font["origin"][i],(5*constants.screen_scale,7*constants.screen_scale))})
+for i in small_font["origin"]:
+    small_font["scaled_3"].update({i:pygame.transform.scale(small_font["origin"][i],(5*constants.screen_scale*1.5,7*constants.screen_scale*1.5))})
