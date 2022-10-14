@@ -48,8 +48,11 @@ AWAKENING_TILE_COLOR = (128,255,128)
 AURIC_DOOR_TILE_COLOR = (64,255,0)
 SECRET_ROOM_TILE_COLOR = (255,128,0)
 PATH_TILE_COLOR = (0,1,0)
-DEFKEYBINDS = {"left":pygame.K_a,"right":pygame.K_d,"jump":pygame.K_w,"action1":"lclick","action2":"rclick","action3":pygame.K_q,"inventory":pygame.K_e}
+DEFKEYBINDS = {"left":pygame.K_a,"right":pygame.K_d,"jump":pygame.K_w,"action1":"lclick","action2":"rclick","action3":pygame.K_q,"inventory":pygame.K_e,"interact":pygame.K_SPACE}
 DEF_SETTINGS = {"keybinds":DEFKEYBINDS}
 FONT_PATH = os.path.join("assets","managers","font")
+PORTRAIT_PATH = os.path.join("assets","sprites","profile")
 CHAR_COLORS = {"default":(128,128,128),"nova":(192,128,255)}
 CHAR_COLORS.setdefault("default",(128,128,128))
+TEXTBOX_BACKGROUND = (32,32,32)
+TEXTBOX_BORDER = (96,96,96)

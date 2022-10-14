@@ -1,6 +1,6 @@
 from assets.managers import common
 from assets.managers import constants
-from assets.managers import entity
+from assets.managers import entity,particle,ai,items
 import os,random,json,pygame
 class Box():
     def __init__(self,rect):
@@ -190,6 +190,8 @@ class Level():
         common.level_transitions.clear()
         common.enemies.clear()
         common.projectiles.clear()
+        common.particles.clear()
+        common.particle_spawners.clear()
         try:
             for i in data["boxes"]:
                 common.boxes.append(Box(pygame.Rect(i["x"],i["y"],i["w"],i["h"]))) #add extra boxes w/o collision
@@ -208,6 +210,9 @@ class Level():
                 entity.new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
         except:
             pass
+        if data.get("particle_spawners",None)!=None:
+            for i in data["particle_spawners"]:
+                common.particle_spawners.append(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"]))
         k=0
         m=0
         boxrectlist = []                                                     #all this is the algorithm for making the boxes
@@ -434,6 +439,13 @@ class Map():
 class Run():
     def __init__(self,difficulty,seed=0x00000000): #this object will be saved
         self.seed = seed
+        common.player.x = constants.DEF_START_POS[0]
+        common.player.y = constants.DEF_START_POS[1]
+        common.player.AIpointer = ai.playerAI
+        common.player.overlay_active = True
+        common.player.inventory["main_0"] = items.items["gun"]
+        common.player.inventory["main_1"] = items.items["gun2"]
+        common.player.facing_away = True
         random.seed(self.seed)
         self.difficulty = difficulty
         self.intermediary = Map(self.seed)

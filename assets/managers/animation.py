@@ -1,5 +1,5 @@
 import pygame
-from assets.managers import constants,common,level,cutscene
+from assets.managers import constants,common,level
 import random
 import math,os
 def simple(self):
@@ -33,18 +33,23 @@ def player_anim(self):
             if common.loaded_level.collision.get_at((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2))!=0 and common.loaded_level.collision.get_at((self.hitbox.x+self.hitbox.w+1,self.hitbox.y+self.hitbox.h-2))!=0:
                 image = self.walking_anim[0]
                 arm_image = self.arm_anim[2]
+            self.facing_away = False
         elif x_vel<self.accel:
             image = self.walking_anim[4]
             arm_image = self.arm_anim[2]
+            self.facing_away = False
         elif self.animation_ticks.tick>=40:
             image = self.walking_anim[3]
             arm_image = self.arm_anim[3]
+            self.facing_away = False
         elif self.animation_ticks.tick>=30:
             image = self.walking_anim[2]
             arm_image = self.arm_anim[4]
+            self.facing_away = False
         elif self.animation_ticks.tick>=20:
             image = self.walking_anim[1]
             arm_image = self.arm_anim[2]
+            self.facing_away = False
         if self.animation_ticks.tick>=49:
             self.animation_ticks.tick = 20
     else:
@@ -52,10 +57,12 @@ def player_anim(self):
             image = self.falling_anim[1]
             arm_image = self.arm_anim[6]
             self.animation_ticks.Reset()
+            self.facing_away = False
         elif self.y_vel>0:
             image = self.falling_anim[0]
             arm_image = self.arm_anim[5]
             self.animation_ticks.tick = 1
+            self.facing_away = False
     #print(str(self.animation_ticks)+", "+str(self.x_vel))
     if pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]:
         arm_image = self.arm_anim[0]
@@ -79,17 +86,17 @@ def player_anim(self):
     else:
         if self.anim_flip:
             arm_image = pygame.transform.flip(arm_image,True,False)
+    if self.facing_away:
+        image = self.facing_away_img
     if self.anim_flip:
         image = pygame.transform.flip(image,True,False)
     constants.WIN.blit(image,(self.hitbox.x,self.hitbox.y+1))
-    if not (pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]):
+    if not (pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]) and not self.facing_away:
         constants.WIN.blit(arm_image,(self.hitbox.x,self.hitbox.y+1))
     if keys[pygame.K_p]:
         common.run = level.Run(0,os.urandom(16))
     if keys[pygame.K_g]:
         common.loaded_level.hud.blit(pygame.transform.scale(common.run.intermediary.map,(common.run.intermediary.map.get_width()*(constants.screen_scale*2-1),common.run.intermediary.map.get_height()*(constants.screen_scale*2-1))),(0,0))
     if keys[pygame.K_h]:
-        #common.Font("nova",pygame.Rect(200,200,1,1),"hello world")
-        cutscene.e.update()
-    else:
-        cutscene.e.close()
+        common.active_text = common.e
+        common.active_text.is_open = True

@@ -6,7 +6,8 @@
         "action1": "lclick",
         "action2": "rclick",
         "action3": 113,
-        "inventory": 101
+        "inventory": 101,
+        "interact": 32
     },
     "keybindings": {
         "left": 97,
@@ -15,6 +16,7 @@
         "action1": "lclick",
         "action2": "rclick",
         "action3": 113,
-        "inventory": 101
+        "inventory": 101,
+        "interact": 32
     }
 }

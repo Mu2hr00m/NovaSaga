@@ -3,7 +3,7 @@ from assets.managers import constants
 from assets.managers import common
 from assets.managers import animation
 from assets.managers import ai
-import os
+import os,pathlib
 import pygame
 import math,time
 class Entity():
@@ -35,7 +35,9 @@ class Entity():
         low_thresh = (level-1)*100
         return (level,low_thresh,xp-low_thresh)
     def __init__(self,AItype="simple",texturepath="player",xp=0):
+        self.name = "NoName"
         self.iframes = common.Ticker(10)
+        self.text_color = constants.CHAR_COLORS["default"]
         self.has_control = True
         self.ground_drag = constants.DEF_GROUND_DRAG
         self.air_drag = constants.DEF_AIR_DRAG
@@ -48,6 +50,7 @@ class Entity():
         self.anim_flip = False
         self.ai_type = AItype
         self.index = 0
+        self.portraits = {"default":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"default.png")),(32*constants.screen_scale,32*constants.screen_scale))}
         self.x = 0
         self.y = 0
         self.x_vel = 0
@@ -73,9 +76,16 @@ class Entity():
         if AItype=="player":
             self.AIpointer = ai.playerAI
             self.Animation = animation.player_anim
+            self.name = "nova"
         if AItype=="mite":
             self.AIpointer = ai.mite
             self.Animation = animation.simple
+            self.name = "mite"
+        for i in os.listdir(constants.PORTRAIT_PATH):
+            item = i.split("-",1)
+            if item[0]==self.name:
+                self.portraits.update({item[1].split(".",1)[0]:pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,i)),(32*constants.screen_scale,32*constants.screen_scale))})
+        print(self.portraits)
         self.overlay_active = False
         self.xp = xp
         self.overlay = common.loaded_level.camera_surface.copy()
@@ -95,10 +105,16 @@ class Entity():
         self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling1.png")),self.pallet))
         self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling2.png")),self.pallet))
         if self.ai_type=="player":
+            self.text_color = constants.CHAR_COLORS["nova"]
             self.animation_ticks.threshold = 50
             self.inventory = {"main_1":None,"main_2":None,"main_3":None}
+            self.portraits.update({"happy":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-happy.png")),(32*constants.screen_scale,32*constants.screen_scale))})
+            self.portraits.update({"neutral":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-neutral.png")),(32*constants.screen_scale,32*constants.screen_scale))})
+            self.portraits.update({"sad":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-sad.png")),(32*constants.screen_scale,32*constants.screen_scale))})
             for i in range(constants.INV_WIDTH*constants.INV_HEIGHT-1):
                 self.inventory.update({"inv_"+str(i):None})
+            self.facing_away = False
+            self.facing_away_img = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"away_still.png")),self.pallet)
             self.arm_anim = []
             self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm1.png")),self.pallet))
             self.arm_anim[0] = pygame.transform.scale(self.arm_anim[0],(self.arm_anim[0].get_width()*constants.screen_scale,self.arm_anim[0].get_height()*constants.screen_scale))

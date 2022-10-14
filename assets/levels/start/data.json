@@ -12,5 +12,17 @@
             "dest_x": 503,
             "dest_y": 168
         }
+    ],
+    "particle_spawners": [
+        {
+            "x":60,
+            "y":60,
+            "w":30,
+            "h":30,
+            "behavior":"FallingDust",
+            "freq":0.00005,
+            "duration":20,
+            "color":[192,128,255]
+        }
     ]
 }

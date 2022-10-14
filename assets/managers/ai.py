@@ -23,7 +23,7 @@ def mite(self):
 def playerAI(self):
     if self.has_control:
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_RSHIFT]:
             print((self.x,self.y))
         if keys[pygame.K_ESCAPE]:
             common.menu = "pause"
