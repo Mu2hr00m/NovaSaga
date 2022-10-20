@@ -57,7 +57,7 @@ def main():
     common.player = entity.Entity("player","player")
     common.player.texture_size = [4,8]
     common.player.hitbox = pygame.Rect(0,0,8,16)
-    common.e=cutscene.TextSequence([cutscene.TextElement("press^kwto jump",common.player,"happy"),90,cutscene.TextElement("\ngo on, press^kw",common.player,"sad")],1,size=2)
+    common.e=cutscene.TextSequence([cutscene.TextElement("press^kwto jump",common.player,"happy"),90,cutscene.TextElement("\ngo on, press^kw",common.player,"neutral")],1,size=2)
     common.ReloadSettings()
     print("ready")
     while isRunning:
