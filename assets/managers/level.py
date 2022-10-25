@@ -446,6 +446,6 @@ class Run():
         common.player.inventory["main_0"] = items.items["gun"]
         common.player.inventory["main_1"] = items.items["gun2"]
         common.player.facing_away = True
-        random.seed(self.seed)
+        random.seed = self.seed
         self.difficulty = difficulty
         self.intermediary = Map(self.seed)

@@ -43,7 +43,7 @@ class Button():
             constants.menu_surface.blit(self.surface,(self.rect.x,self.rect.y))
 
 def ui_background(w,h,transparent=True):
-    corner = 10*constants.screen_scale
+    corner = 5*constants.screen_scale
     surface = pygame.Surface((w,h))
     border_size = int(constants.screen_scale*1.2)
     half_border = int(border_size/2)
@@ -65,7 +65,7 @@ def ui_background(w,h,transparent=True):
     pygame.draw.line(surface,border_color,(corner,h-half_border),(w-corner,h-half_border),border_size)
     return surface
 title_ui.append(ui_background(width_eighth*3,height_eighth*4,False))
-title_ui.append(pygame.transform.scale(pygame.image.load(os.path.join(ui_path,"title.png")),(150*constants.screen_scale,14*constants.screen_scale)))
+title_ui.append(pygame.transform.scale(pygame.image.load(os.path.join(ui_path,"title.png")),(130*constants.screen_scale,18*constants.screen_scale)))
 title_ui.append(Button(pygame.Rect(0,0,width_eighth*2,constants.BUTTONSIZE),"play.png",1))
 title_ui.append(Button(pygame.Rect(0,0,width_eighth*2,constants.BUTTONSIZE),"settings.png",2))
 title_ui.append(Button(pygame.Rect(0,0,width_eighth*2,constants.BUTTONSIZE),"quit_from_pause.png",3))

@@ -13,6 +13,7 @@ MAX_ZOOM = 20
 MIN_ZOOM = 0.0625
 screen_scale = 4
 disp_win = pygame.display.set_mode((WIDTH*screen_scale,HEIGHT*screen_scale))
+pygame.display.set_caption("Nova Saga Level Editor")
 collision = pygame.Surface((1,1))
 display = pygame.Surface((1,1))
 hud = pygame.Surface((WIDTH*screen_scale,HEIGHT*screen_scale))
@@ -26,7 +27,21 @@ key_cooldown = {}
 colors = {"in_use":(0,1,0)}
 layer = 1
 leveldata = {}
-ui_isopen = {"open":False}
+class UIElement():
+    def __init__(self,name,path,pos):
+        self.image = pygame.image.load(path)
+        self.image = pygame.transform.scale(self.image,(self.image.get_width()*screen_scale/2,self.image.get_height()*screen_scale/2))
+        self.rect = pygame.Rect(pos[0]*screen_scale,pos[1]*screen_scale,self.image.get_width(),self.image.get_height())
+        self.name = name
+        self.isopen = False
+    def draw(self):
+        hud.blit(self.image,self.rect)
+ui_assets = {}
+for i in os.listdir("level-creator-assets"):
+    j = pathlib.Path(os.path.join("level-creator-assets",i))
+    if j.is_file():
+        if j.suffix==".png":
+            ui_assets.update({j.stem.replace("-","_"):UIElement(j.stem.replace("-","_"),j,(8,8))})
 def draw():
     global collision
     global display
@@ -35,8 +50,11 @@ def draw():
     disp_win.fill((128,128,128))
     hud.fill((0,0,0,0))
     hud.blit(font.render(str(zoom),False,(255,255,255)),(30,30))
-    pygame.draw.rect(hud,(30,20,50),pygame.Rect(0,0,disp_win.get_width(),16*screen_scale))
-    if ui_isopen["open"]:
+    pygame.draw.rect(hud,(70,70,70),pygame.Rect(0,0,disp_win.get_width(),16*screen_scale))
+    pygame.draw.rect(hud,(50,50,50),pygame.Rect(0,0,disp_win.get_width(),16*screen_scale),screen_scale)
+    for i in ui_assets.values():
+        i.draw()
+    if ui_assets["open_file"].isopen:
         e = os.listdir(os.path.join("assets","levels"))
         levels = []
         for i in e:
@@ -130,7 +148,7 @@ def main():
             cam[0]-=1
         if keys[pygame.K_o] and not key_cooldown[pygame.K_o].active:
             key_cooldown[pygame.K_o].Trigger()
-            ui_isopen["open"]=not ui_isopen["open"]
+            ui_assets["open_file"].isopen=not ui_assets["open_file"].isopen
         draw()
         pygame.event.clear()
     pygame.quit()
