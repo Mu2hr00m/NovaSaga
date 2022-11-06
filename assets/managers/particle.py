@@ -1,4 +1,3 @@
-from this import d
 from assets.managers import common,constants
 import pygame,random
 def NewParticle(particle):

@@ -1,4 +1,3 @@
-import imp
 from assets.managers import constants
 from assets.managers import common
 from assets.managers import animation
@@ -106,7 +105,7 @@ class Entity():
         self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling2.png")),self.pallet))
         if self.ai_type=="player":
             self.text_color = constants.CHAR_COLORS["nova"]
-            self.animation_ticks.threshold = 50
+            self.animation_ticks.threshold = 35
             self.inventory = {"main_1":None,"main_2":None,"main_3":None}
             self.portraits.update({"happy":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-happy.png")),(32*constants.screen_scale,32*constants.screen_scale))})
             self.portraits.update({"neutral":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-neutral.png")),(32*constants.screen_scale,32*constants.screen_scale))})
