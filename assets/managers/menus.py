@@ -1,11 +1,12 @@
 import pygame
-import os
+import os,math
 from assets.managers import constants,common,level
 border_color = (96,0,144)
 interior_color = (64,48,80)
 ui_path = os.path.join("assets","managers","menu_ui")
 title_ui = []
 pause_ui = []
+seed_ui = []
 menu_ticks = common.Ticker(20)
 width_eighth = constants.menu_surface.get_width()/8
 height_eighth = constants.menu_surface.get_height()/8
@@ -76,6 +77,22 @@ pause_ui.append(Button(pygame.Rect(0,0,width_eighth*2,constants.BUTTONSIZE),"set
 pause_ui.append(Button(pygame.Rect(0,0,width_eighth*2,constants.BUTTONSIZE),"restartrun.png",2))
 pause_ui.append(Button(pygame.Rect(0,0,width_eighth*2,constants.BUTTONSIZE),"quit_to_title.png",3))
 pause_ui.append(Button(pygame.Rect(0,0,width_eighth*2,constants.BUTTONSIZE),"quit_from_pause.png",4))
+for i in "0123456789abcdef":
+    seed_ui.append(Button(pygame.Rect(0,0,32*constants.screen_scale,32*constants.screen_scale),"seed_"+i+".png",0))
+for i in enumerate(seed_ui):
+    i[1].surface = pygame.image.load(os.path.join(ui_path,i[1].path))
+    surface2 = i[1].surface.copy()
+    arr = pygame.PixelArray(surface2)
+    arr.replace((144,128,192),(192,160,255))
+    arr.close()
+    i[1].down_surface = surface2
+    i[1].surface = pygame.transform.scale(i[1].surface,(32*constants.screen_scale,32*constants.screen_scale))
+    i[1].down_surface = pygame.transform.scale(i[1].down_surface,(32*constants.screen_scale,32*constants.screen_scale))
+    i[1].rect.x = (i[0]%4*34+58)*constants.screen_scale
+    i[1].rect.y = (math.floor(i[0]/4)*34+44)*constants.screen_scale
+seed_ui.append(ui_background(width_eighth*6,height_eighth*7))
+seed_ui.append(pygame.transform.scale(pygame.image.load(os.path.join(ui_path,"seedselect.png")),(58*constants.screen_scale,14*constants.screen_scale)))
+seed_ui.append([])
 def title():
     global menu_ticks
     constants.menu_surface.fill((0,1,0,0))
@@ -88,8 +105,7 @@ def title():
         keys = pygame.key.get_pressed()
         if pygame.mouse.get_pressed(5)[0]:
             if title_ui[2].rect.collidepoint(pygame.mouse.get_pos()):
-                common.menu = None
-                common.run = level.Run(0,os.urandom(16))
+                common.menu = "seed"
                 menu_ticks.Trigger()
             elif title_ui[3].rect.collidepoint(pygame.mouse.get_pos()):
                 print("settings not implemented")
@@ -134,3 +150,28 @@ def pause():
         if keys[pygame.K_ESCAPE]:
             common.menu = None
             menu_ticks.Trigger()
+def seed():
+    global menu_ticks
+    constants.menu_surface.fill((0,1,0))
+    constants.menu_surface.blit(seed_ui[16],(width_eighth,height_eighth/2))
+    constants.menu_surface.blit(seed_ui[17],(width_eighth*1.25,height_eighth*0.875))
+    for i in range(16):
+        if (seed_ui[i].rect.collidepoint(pygame.mouse.get_pos()) and common.KeyDirect("mouse1")) or common.KeyDirect(eval("pygame.K_"+seed_ui[i].path[5])):
+            if len(seed_ui[18])<=16:
+                seed_ui[18].append(seed_ui[i].path[5])
+    for i in range(16):
+        seed_ui[i].Draw()
+    if common.KeyDirect(pygame.K_BACKSPACE):
+        if len(seed_ui[18])>=2:
+            seed_ui[18].pop()
+        elif len(seed_ui[18])==1:
+            seed_ui[18]=[]
+    if common.KeyDirect(pygame.K_RETURN):
+        common.menu = None
+        e = ""
+        for i in seed_ui[18]:
+            e+=i
+        if len(e)<16:
+            seed_ui[18]+="0"*(16-len(e))
+        common.run.reload(0,int(e,16))
+    common.Font((0,1,0),pygame.Rect(width_eighth*3.25,height_eighth,width_eighth*4.75,height_eighth*2),seed_ui[18]+[None],2,constants.menu_surface)

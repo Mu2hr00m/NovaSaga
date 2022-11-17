@@ -437,7 +437,11 @@ class Map():
             common.loaded_level.load("start")
             common.global_position = [self.doorways[0].pos[0],self.doorways[0].pos[1]]
 class Run():
-    def __init__(self,difficulty,seed=0x00000000): #this object will be saved
+    def __init__(self):
+        self.seed = 0
+        self.difficulty = 0
+        self.intermediary = None
+    def reload(self,difficulty,seed=0x00000000): #this object will be saved
         self.seed = seed
         common.player.x = constants.DEF_START_POS[0]
         common.player.y = constants.DEF_START_POS[1]

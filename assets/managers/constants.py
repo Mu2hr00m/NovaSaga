@@ -30,12 +30,20 @@ ITEM_PATH = os.path.join("assets","sprites","items")
 PROJ_PATH = os.path.join("assets","sprites","projectile")
 ui_path = os.path.join("assets","managers","menu_ui")
 disp_win = pygame.display.set_mode((WIDTH*screen_scale,HEIGHT*screen_scale))
-title_subtitles = ["Nova Saga: ","Mirror Worlds","The Unknown","Brain Games","The Game","LLOORREE!!!","Inspired by FTL","Inspired by Terraria","All Inclusive!","Indie Game!","Inspired by 20 Minutes till Dawn","Multiverse Theory","Quantum Mechanics","Uploading to human.exe","Not an Asteroid"]
+title_subtitles = ["Nova Saga: ","Mirror Worlds","The Unknown","Brain Games","The Game","LLOORREE!!!","Inspired by FTL","Inspired by Terraria","All Inclusive!","Indie Game!","Inspired by 20 Minutes till Dawn","Multiverse Theory","Quantum Mechanics","Uploading to human.exe","Not an Asteroid","Not Mind Controlling You"]
 pygame.display.set_caption(title_subtitles[0]+title_subtitles[random.randint(1,len(title_subtitles)-1)])
 if pygame.display.get_caption()[0]=="Nova Saga: All Inclusive!":
     pygame.display.set_icon(pygame.image.load(os.path.join(ui_path,"rainbow-icon.png")))
 else:
     pygame.display.set_icon(pygame.image.load(os.path.join(ui_path,"icon.png")))
+valid_text = ["qwertyuiopasdfghjklzxcvbnm1234567890","AMPERSAND","ASTERISK","AT","BACKQUOTE","BACKSLASH","BACKSPACE","CAPSLOCK","CLEAR","COLON","COMMA","CURRENCYUNIT","DELETE","DOLLAR","DOWN","END","EQUALS","ESCAPE","EXCLAIM","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","GREATER","HASH","HELP","HOME","INSERT","KP0","KP1","KP2","KP3","KP4","KP5","KP6","KP7","KP8","KP9","KP_0","KP_1","KP_2","KP_3","KP_4","KP_5","KP_6","KP_7","KP_8","KP_9","KP_DIVIDE","KP_ENTER","KP_EQUALS","KP_MINUS","KP_MULTIPLY","KP_PERIOD","KP_PLUS","LALT","LCTRL","LEFT","LEFTBRACKET","LESS","LSHIFT","MENU","MINUS","MODE","PAGEDOWN","PAGEUP","PAUSE","PERCENT","PERIOD","PLUS","POWER","QUESTION","QUOTE","RALT","RCTRL","RETURN","RIGHT","RIGHTBRACKET","RSHIFT","SEMICOLON","SLASH","SPACE","TAB","UNDERSCORE"]
+keyboard_binds = {}
+for i in valid_text[0]:valid_text.append(i)
+del valid_text[0]
+for i in range(255):
+    if pygame.key.name(i)!="":
+        keyboard_binds.update({i:False})
+del valid_text
 WIN = pygame.transform.scale(disp_win.copy(),(WIDTH,HEIGHT))
 menu_surface = disp_win.copy()
 menu_surface.set_colorkey((0,0,0,0))
@@ -54,6 +62,7 @@ TRAUMA_TILE_COLOR = (255,0,0)
 AWAKENING_TILE_COLOR = (128,255,128)
 AURIC_DOOR_TILE_COLOR = (64,255,0)
 SECRET_ROOM_TILE_COLOR = (255,128,0)
+DEF_KEY_COOLDOWN = 10
 PATH_TILE_COLOR = (0,1,0)
 DEFKEYBINDS = {"left":pygame.K_a,"right":pygame.K_d,"jump":pygame.K_w,"action1":"lclick","action2":"rclick","action3":pygame.K_q,"inventory":pygame.K_e,"interact":pygame.K_SPACE}
 DEF_SETTINGS = {"keybinds":DEFKEYBINDS}

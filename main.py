@@ -53,6 +53,7 @@ def main():
     clock = pygame.time.Clock()
     isRunning = True
     tick = 0
+    common.run = level.Run()
     common.loaded_level = level.Level()
     common.player = entity.Entity("player","player")
     common.player.texture_size = [4,8]
@@ -71,6 +72,38 @@ def main():
             if event.type == pygame.QUIT:
                 isRunning = False
                 break
+        keys = pygame.key.get_pressed()
+        for i in common.PressedKeys.keys():
+            if type(i)==int:
+                common.KeyCooldown[i].Tick()
+                if common.KeyCooldown[i].active:
+                    common.PressedKeys[i] = False
+                else:
+                    common.PressedKeys[i] = keys[i]
+                if keys[i]:
+                    common.KeyCooldown[i].Trigger()
+                else:
+                    common.KeyCooldown[i].Reset()
+        for i in common.PressedKeys.keys():
+            if type(i)==int:
+                common.PressedKeysNoCooldown[i]=keys[i]
+            elif pygame.mouse.get_focused():
+                common.PressedKeysNoCooldown[i]=pygame.mouse.get_pressed(5)[int(i[5])-1]
+        if pygame.mouse.get_focused():
+            for i in enumerate(pygame.mouse.get_pressed()):
+                i = ("mouse"+str(i[0]+1),i[1])
+                if common.KeyCooldown[i[0]].active:
+                    common.KeyCooldown[i[0]].Tick()
+                    common.PressedKeys[i[0]] = False
+                else:
+                    common.PressedKeys[i[0]] = i[1]
+                if i[1]:
+                    common.KeyCooldown[i[0]].Trigger()
+                else:
+                    common.KeyCooldown[i[0]].Reset()
+        else:
+            for i in "12345":
+                common.PressedKeys["mouse"+i] = False
         pygame.event.clear()
         if common.menu==None:
             menus.menu_ticks.Trigger()
@@ -92,6 +125,8 @@ def main():
                 menus.title()
             elif common.menu=="pause":
                 menus.pause()
+            elif common.menu=="seed":
+                menus.seed()
             constants.disp_win.blit(constants.menu_surface,(0,0))
             pygame.display.update()
     json.dump(common.Settings,open("settings","w"),indent=4)

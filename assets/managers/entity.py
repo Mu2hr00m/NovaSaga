@@ -1,4 +1,3 @@
-import imp
 from assets.managers import constants
 from assets.managers import common
 from assets.managers import animation

@@ -1,5 +1,10 @@
 from assets.managers import constants
 import pygame,time,os,pathlib,json
+class Placeholder():
+    def __init__(self,attrs):
+        for i in attrs:
+            exec("self."+i+" = None")
+loaded_level = Placeholder(["hud"])
 class Ticker():
     def __init__(self,threshold):
         self.threshold = threshold
@@ -26,16 +31,18 @@ class Ticker():
     def Reset(self):
         self.tick = -1
         self.active = False
-def GetPressed(control):
+def GetPressed(control)->bool:
     Key = Keybinds[control]
     if type(Key)==str:
         if pygame.mouse.get_focused():
             if Key=="lclick":
-                return pygame.mouse.get_pressed(5)[0]
+                return PressedKeysNoCooldown["mouse1"]
             elif Key=="rclick":
-                return pygame.mouse.get_pressed(5)[1]
+                return PressedKeysNoCooldown["mouse2"]
     else:
-        return pygame.key.get_pressed()[Key]
+        return PressedKeysNoCooldown[Key]
+def KeyDirect(key)->bool:
+    return PressedKeys[key]
 def ReloadSettings():
     file = None
     truefile = None
@@ -65,7 +72,11 @@ def out_of_bounds(pos):
     if pos[1]<0 or pos[1]>constants.WIN.get_height()-1:
         oob = True
     return oob
-def Font(color,rect=pygame.Rect,text=str,size=1):
+def Font(color,rect=pygame.Rect,text=str,size=1,dest_surface=loaded_level.hud):
+    return_surface = False
+    if type(dest_surface)!=pygame.Surface:
+        dest_surface=pygame.Surface((rect.w,rect.h))
+        return_surface=True
     cur_pos = [rect.x,rect.y]
     base = small_font["scaled_"+str(size)].copy()
     for i in base:
@@ -84,23 +95,25 @@ def Font(color,rect=pygame.Rect,text=str,size=1):
             if i+3<=len(text):
                 cur_pos[0]+=2*constants.screen_scale/2*size
                 if text[i+1]=="k":
-                    loaded_level.hud.blit(key_img["scaled_"+str(size)][text[i+2]],(cur_pos[0],cur_pos[1]-constants.screen_scale/2*size))
+                    dest_surface.blit(key_img["scaled_"+str(size)][text[i+2]],(cur_pos[0],cur_pos[1]-constants.screen_scale/2*size))
                 elif text[i+1]=="m":
-                    loaded_level.hud.blit(key_img["scaled_"+str(size)]["M_"+text[i+2]],(cur_pos[0],cur_pos[1]-constants.screen_scale/2*size))
+                    dest_surface.blit(key_img["scaled_"+str(size)]["M_"+text[i+2]],(cur_pos[0],cur_pos[1]-constants.screen_scale/2*size))
                 cur_pos[0]+=12*constants.screen_scale/2*size
                 i+=2
         else:
             if i==0:
-                loaded_level.hud.blit(base.get(text[i],base["def"]),cur_pos)
+                dest_surface.blit(base.get(text[i],base["def"]),cur_pos)
                 cur_pos[0]+=6*constants.screen_scale/2*size
             elif i==1:
                 if text[i-1]!="^":
-                    loaded_level.hud.blit(base.get(text[i],base["def"]),cur_pos)
+                    dest_surface.blit(base.get(text[i],base["def"]),cur_pos)
                     cur_pos[0]+=6*constants.screen_scale/2*size
             else:
                 if text[i-1]!="^" and text[i-2]!="^":
-                    loaded_level.hud.blit(base.get(text[i],base["def"]),cur_pos)
+                    dest_surface.blit(base.get(text[i],base["def"]),cur_pos)
                     cur_pos[0]+=6*constants.screen_scale/2*size
+    if return_surface:
+        return dest_surface
 Settings = None
 Keybinds = None
 enemies = []
@@ -111,11 +124,16 @@ particles = []
 particle_spawners = []
 active_text = None
 player = None
-loaded_level = None
 e=None
 global_position = (0,0)
 run = None
 tick = 0
+PressedKeys = constants.keyboard_binds.copy()
+PressedKeys.update({"mouse1":False,"mouse2":False,"mouse3":False,"mouse4":False,"mouse5":False})
+KeyCooldown = PressedKeys.copy()
+PressedKeysNoCooldown = PressedKeys.copy()
+for i in KeyCooldown:
+    KeyCooldown[i] = Ticker(constants.DEF_KEY_COOLDOWN)
 realclock = time.time()
 small_font = {"origin":{},"scaled_1":{},"scaled_2":{},"scaled_3":{}}
 key_img = {"origin":{},"scaled_1":{},"scaled_2":{},"scaled_3":{}}
