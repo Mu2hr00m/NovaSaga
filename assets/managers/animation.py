@@ -29,7 +29,7 @@ def player_anim(self):
         self.animation_ticks.Tick()
         if x_vel==0:
             self.animation_ticks.Reset()
-        elif self.animation_ticks.tick<=4 and not common.out_of_bounds((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2)):
+        elif self.animation_ticks.tick<=5 and not common.out_of_bounds((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2)):
             if common.loaded_level.collision.get_at((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2))!=0 and common.loaded_level.collision.get_at((self.hitbox.x+self.hitbox.w+1,self.hitbox.y+self.hitbox.h-2))!=0:
                 image = self.walking_anim[0]
                 arm_image = self.arm_anim[2]
@@ -50,7 +50,7 @@ def player_anim(self):
             image = self.walking_anim[1]
             arm_image = self.arm_anim[2]
             self.facing_away = False
-        if self.animation_ticks.tick>=34:
+        if self.animation_ticks.tick>=35:
             self.animation_ticks.tick = 5
     else:
         if self.y_vel>0.7:
