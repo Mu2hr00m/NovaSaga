@@ -12,10 +12,12 @@ def player_anim(self):
     pygame.draw.rect(common.loaded_level.hud,(16,16,16),pygame.Rect(common.loaded_level.hud.get_width()-constants.screen_scale*23,0,constants.screen_scale*24,constants.screen_scale*12))
     pygame.draw.rect(common.loaded_level.hud,(16,128,16),pygame.Rect(common.loaded_level.hud.get_width()-constants.screen_scale*24,-constants.screen_scale,constants.screen_scale*25,constants.screen_scale*13),constants.screen_scale)
     pygame.draw.rect(common.loaded_level.hud,(16,96,16),pygame.Rect(common.loaded_level.hud.get_width()-constants.screen_scale*22,constants.screen_scale,constants.screen_scale*21*(self.xp%100/100),constants.screen_scale*9))
-    image = self.still_anim
-    arm_image = self.arm_anim[1]
+    common.loaded_level.hud.blit(self.spritesheet["origin"],(0,0))
+    image = self.spritesheet[0][0]
+    arm_image = self.spritesheet[3][1]
     x_vel = self.x_vel
     y_vel = self.y_vel
+    animation_type = 0
     if x_vel<0:
         x_vel*=-1
     if y_vel<0:
@@ -31,41 +33,47 @@ def player_anim(self):
             self.animation_ticks.Reset()
         elif self.animation_ticks.tick<=5 and not common.out_of_bounds((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2)):
             if common.loaded_level.collision.get_at((self.hitbox.x-1,self.hitbox.y+self.hitbox.h-2))!=0 and common.loaded_level.collision.get_at((self.hitbox.x+self.hitbox.w+1,self.hitbox.y+self.hitbox.h-2))!=0:
-                image = self.walking_anim[0]
-                arm_image = self.arm_anim[2]
+                image = self.spritesheet[1][0]
+                arm_image = self.spritesheet[3][2]
             self.facing_away = False
         elif x_vel<self.accel:
-            image = self.walking_anim[4]
-            arm_image = self.arm_anim[2]
+            image = self.spritesheet[1][4]
+            arm_image = self.spritesheet[3][2]
             self.facing_away = False
+            animation_type = 1
         elif self.animation_ticks.tick>=25:
-            image = self.walking_anim[3]
-            arm_image = self.arm_anim[3]
+            image = self.spritesheet[1][3]
+            arm_image = self.spritesheet[3][3]
             self.facing_away = False
+            animation_type = 1
         elif self.animation_ticks.tick>=15:
-            image = self.walking_anim[2]
-            arm_image = self.arm_anim[4]
+            image = self.spritesheet[1][2]
+            arm_image = self.spritesheet[3][4]
             self.facing_away = False
+            animation_type = 1
         elif self.animation_ticks.tick>=5:
-            image = self.walking_anim[1]
-            arm_image = self.arm_anim[2]
+            image = self.spritesheet[1][1]
+            arm_image = self.spritesheet[3][2]
             self.facing_away = False
+            animation_type = 1
         if self.animation_ticks.tick>=35:
             self.animation_ticks.tick = 5
     else:
         if self.y_vel>0.7:
             image = self.falling_anim[1]
-            arm_image = self.arm_anim[6]
+            arm_image = self.spritesheet[3][6]
             self.animation_ticks.Reset()
             self.facing_away = False
+            animation_type = 2
         elif self.y_vel>0:
             image = self.falling_anim[0]
-            arm_image = self.arm_anim[5]
+            arm_image = self.spritesheet[3][5]
             self.animation_ticks.tick = 1
             self.facing_away = False
+            animation_type = 2
     #print(str(self.animation_ticks)+", "+str(self.x_vel))
-    if pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]:
-        arm_image = self.arm_anim[0]
+    if common.GetPressed("action1"):
+        arm_image = self.spritesheet[3][0]
         arm_image.blit(self.inventory["main_0"].texture,(int((arm_image.get_width()-constants.screen_scale)/2),int((arm_image.get_height()-constants.screen_scale)/2)))
         angle = self.angle
         w_offset = -constants.screen_scale/2
@@ -90,9 +98,11 @@ def player_anim(self):
         image = self.facing_away_img
     if self.anim_flip:
         image = pygame.transform.flip(image,True,False)
-    constants.WIN.blit(image,(self.hitbox.x,self.hitbox.y+1))
-    if not (pygame.mouse.get_focused() and pygame.mouse.get_pressed(5)[0]) and not self.facing_away:
-        constants.WIN.blit(arm_image,(self.hitbox.x,self.hitbox.y+1))
+    offset = self.spritesheet[animation_type]["offset"]
+    arm_offset = self.spritesheet[3]["offset"]
+    constants.WIN.blit(image,(self.hitbox.x+offset[0],self.hitbox.y+offset[1]))
+    if not common.GetPressed("action1") and not self.facing_away:
+        constants.WIN.blit(arm_image,(self.hitbox.x+arm_offset[0],self.hitbox.y+arm_offset[1]))
     if keys[pygame.K_p]:
         common.run = level.Run(0,os.urandom(16))
     if keys[pygame.K_g]:

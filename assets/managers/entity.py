@@ -6,17 +6,10 @@ import os,pathlib
 import pygame
 import math,time
 class Entity():
-    def apply_pallet(self,surface,pallet):
+    def apply_pallet(self,surface:pygame.Surface,pallet:pygame.Surface,rep_pallet:pygame.Surface)->pygame.Surface:
         arr = pygame.PixelArray(surface)
-        arr.replace((128,0,0),pallet.get_at((0,0)))
-        arr.replace((255,0,0),pallet.get_at((1,0)))
-        arr.replace((255,128,0),pallet.get_at((2,0)))
-        arr.replace((255,255,0),pallet.get_at((3,0)))
-        arr.replace((128,128,0),pallet.get_at((4,0)))
-        arr.replace((0,128,0),pallet.get_at((5,0)))
-        arr.replace((0,255,0),pallet.get_at((6,0)))
-        arr.replace((0,255,128),pallet.get_at((7,0)))
-        arr.replace((0,128,128),pallet.get_at((8,0)))
+        for i in range(min(rep_pallet.get_width(),pallet.get_width())):
+            arr.replace(rep_pallet.get_at((i,0)),pallet.get_at((i,0)))
         arr.close()
         return surface
     def kill(self):
@@ -94,15 +87,15 @@ class Entity():
         pygame.draw.circle(self.overlay,(24,24,24),(self.overlay.get_width()/2,self.overlay.get_height()/2),128)
         pygame.draw.circle(self.overlay,(40,40,40),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
         pygame.draw.circle(self.overlay,(64,64,64),(self.overlay.get_width()/2,self.overlay.get_height()/2),32)
-        self.pallet = pygame.image.load(os.path.join(self.texture_path,"pallet.png"))
-        self.still_anim = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"still.png")),self.pallet)
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking1.png")),self.pallet))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking2.png")),self.pallet))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking3.png")),self.pallet))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking4.png")),self.pallet))
-        self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking5.png")),self.pallet))
-        self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling1.png")),self.pallet))
-        self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling2.png")),self.pallet))
+        #self.pallet = pygame.image.load(os.path.join(self.texture_path,"pallet.png"))
+        #self.still_anim = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"still.png")),self.pallet)
+        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking1.png")),self.pallet))
+        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking2.png")),self.pallet))
+        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking3.png")),self.pallet))
+        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking4.png")),self.pallet))
+        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking5.png")),self.pallet))
+        #self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling1.png")),self.pallet))
+        #self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling2.png")),self.pallet))
         if self.ai_type=="player":
             self.text_color = constants.CHAR_COLORS["nova"]
             self.animation_ticks.threshold = 35
@@ -112,17 +105,32 @@ class Entity():
             self.portraits.update({"sad":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-sad.png")),(32*constants.screen_scale,32*constants.screen_scale))})
             for i in range(constants.INV_WIDTH*constants.INV_HEIGHT-1):
                 self.inventory.update({"inv_"+str(i):None})
+            self.spritesheet = common.Spritesheet(os.path.join("assets","sprites","player_sprites.png"))
+            self.still_anim = self.apply_pallet(self.spritesheet[0][0],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0])
+            self.facing_away_img = self.apply_pallet(self.spritesheet[0][1],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0])
             self.facing_away = False
-            self.facing_away_img = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"away_still.png")),self.pallet)
+            self.walking_anim = []
+            self.falling_anim = []
             self.arm_anim = []
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm1.png")),self.pallet))
-            self.arm_anim[0] = pygame.transform.scale(self.arm_anim[0],(self.arm_anim[0].get_width()*constants.screen_scale,self.arm_anim[0].get_height()*constants.screen_scale))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm2.png")),self.pallet))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm3.png")),self.pallet))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm4.png")),self.pallet))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm5.png")),self.pallet))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm6.png")),self.pallet))
-            self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm7.png")),self.pallet)) 
+            for i in self.spritesheet[1]:
+                if type(self.spritesheet[1][i])==pygame.Surface:
+                    self.walking_anim.append(self.apply_pallet(self.spritesheet[1][i],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0]))
+            for i in self.spritesheet[2]:
+                if type(self.spritesheet[2][i])==pygame.Surface:
+                    self.falling_anim.append(self.apply_pallet(self.spritesheet[2][i],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0]))
+            for i in self.spritesheet[3]:
+                if type(self.spritesheet[3][i])==pygame.Surface:
+                    self.arm_anim.append(self.apply_pallet(self.spritesheet[3][i],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0]))
+            print(self.arm_anim)
+            #self.facing_away_img = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"away_still.png")),self.pallet)
+            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm1.png")),self.pallet))
+            #self.arm_anim[0] = pygame.transform.scale(self.arm_anim[0],(self.arm_anim[0].get_width()*constants.screen_scale,self.arm_anim[0].get_height()*constants.screen_scale))
+            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm2.png")),self.pallet))
+            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm3.png")),self.pallet))
+            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm4.png")),self.pallet))
+            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm5.png")),self.pallet))
+            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm6.png")),self.pallet))
+            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm7.png")),self.pallet)) 
     def Draw(self):
         self.Animation(self)
     def collide(self,side="bottom"):

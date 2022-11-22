@@ -114,6 +114,36 @@ def Font(color,rect=pygame.Rect,text=str,size=1,dest_surface=loaded_level.hud):
                     cur_pos[0]+=6*constants.screen_scale/2*size
     if return_surface:
         return dest_surface
+def Spritesheet(path:str):
+    spritesheet = pygame.image.load(path)
+    pixel_1 = spritesheet.get_at((0,0))
+    num_rows = pixel_1.r
+    pallet_len = pixel_1.g
+    num_pallets = pixel_1.b
+    data = {"pallets":[],"origin":spritesheet}
+    for i in range(num_pallets):
+        data["pallets"].append(pygame.Surface((pallet_len,1)))
+        data["pallets"][i].blit(spritesheet.subsurface(pygame.Rect(-pallet_len+spritesheet.get_width()-pallet_len*i,0,pallet_len,1)),(0,0))
+    row_index = 1
+    for i in range(num_rows):
+        row_data = {}
+        pixel_2 = spritesheet.get_at((i*2+1,0))
+        pixel_3 = spritesheet.get_at((i*2+2,0))
+        pixel_3 = [pixel_3.r,pixel_3.g,pixel_3.b]
+        sprite_rect = pygame.Rect(0,row_index,pixel_2.r,pixel_2.g)
+        if pixel_3[0]>128:
+            pixel_3[0] = pixel_3[0]-255
+        if pixel_3[1]>128:
+            pixel_3[1] = pixel_3[1]-255
+        row_data.update({"offset":(pixel_3[0],pixel_3[1])})
+        for j in range(pixel_2.b):
+            row_data.update({j:pygame.Surface((pallet_len,1))})
+            row_data[j] = spritesheet.subsurface(sprite_rect)
+            print((sprite_rect.x,sprite_rect.y,sprite_rect.w,sprite_rect.h))
+            sprite_rect.x+=pixel_2.r
+        data.update({i:row_data})
+        row_index+=pixel_2.g
+    return data
 Settings = None
 Keybinds = None
 enemies = []
