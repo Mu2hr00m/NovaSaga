@@ -116,10 +116,11 @@ def Font(color,rect=pygame.Rect,text=str,size=1,dest_surface=loaded_level.hud):
         return dest_surface
 def Spritesheet(path:str):
     spritesheet = pygame.image.load(path)
+    #spritesheet.set_colorkey((0,0,0,0))
     pixel_1 = spritesheet.get_at((0,0))
-    num_rows = pixel_1.r
-    pallet_len = pixel_1.g
-    num_pallets = pixel_1.b
+    num_rows = pixel_1.r      #red channel of top left most pixel tells how many rows
+    pallet_len = pixel_1.g    #green channel of top left most pixel tells how many pixels long a given pallet is
+    num_pallets = pixel_1.b   #blue channel of top left most pixel tells how many pallets, arranged right to left
     data = {"pallets":[],"origin":spritesheet}
     for i in range(num_pallets):
         data["pallets"].append(pygame.Surface((pallet_len,1)))
@@ -127,9 +128,9 @@ def Spritesheet(path:str):
     row_index = 1
     for i in range(num_rows):
         row_data = {}
-        pixel_2 = spritesheet.get_at((i*2+1,0))
-        pixel_3 = spritesheet.get_at((i*2+2,0))
-        pixel_3 = [pixel_3.r,pixel_3.g,pixel_3.b]
+        pixel_2 = spritesheet.get_at((i*2+1,0))   #pixel 2: red channel is sprite width, green is sprite height, blue is sprite count
+        pixel_3 = spritesheet.get_at((i*2+2,0))   #pixel 3: red channel is offset x, green is offset y
+        pixel_3 = [pixel_3.r,pixel_3.g,pixel_3.b] #if offset is greater than 128, the difference from it to 255 is the offset, but negative
         sprite_rect = pygame.Rect(0,row_index,pixel_2.r,pixel_2.g)
         if pixel_3[0]>128:
             pixel_3[0] = pixel_3[0]-255
@@ -139,7 +140,6 @@ def Spritesheet(path:str):
         for j in range(pixel_2.b):
             row_data.update({j:pygame.Surface((pallet_len,1))})
             row_data[j] = spritesheet.subsurface(sprite_rect)
-            print((sprite_rect.x,sprite_rect.y,sprite_rect.w,sprite_rect.h))
             sprite_rect.x+=pixel_2.r
         data.update({i:row_data})
         row_index+=pixel_2.g

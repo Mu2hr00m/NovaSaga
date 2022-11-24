@@ -13,6 +13,15 @@
             "dest_y": 168
         }
     ],
+    "enemies": [
+        {
+            "type": "mite",
+            "hp": 5,
+            "x": 155,
+            "y": 100,
+            "always_spawns": true
+        }
+    ],
     "particle_spawners": [
         {
             "x":60,

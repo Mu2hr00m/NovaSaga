@@ -23,6 +23,11 @@ def draw():
     constants.WIN.fill((48,48,48))
     common.loaded_level.hud.fill((0,0,0,255))
     common.loaded_level.update_camera()
+    for box in common.boxes:
+        box.Draw()
+    constants.WIN.blit(common.loaded_level.display_texture,(0,0))
+    if common.player.overlay_active:
+        constants.WIN.blit(common.player.overlay,(common.player.x-(constants.CAM_WIDTH*1.5)-1,common.player.y-(constants.CAM_HEIGHT*1.5)))
     for i in common.enemies:
         if i!=None:
             i.Animation(i)
@@ -32,11 +37,6 @@ def draw():
     for i in common.particles:
         if i!=None:
             i.draw()
-    for box in common.boxes:
-        box.Draw()
-    constants.WIN.blit(common.loaded_level.display_texture,(0,0))
-    if common.player.overlay_active:
-        constants.WIN.blit(common.player.overlay,(common.player.x-(constants.CAM_WIDTH*1.5)-1,common.player.y-(constants.CAM_HEIGHT*1.5)))
     #for box in game_classes.boxes:
         #box.afterdraw()
     for i in common.level_transitions:

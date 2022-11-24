@@ -54,9 +54,6 @@ class Entity():
         self.animation_ticks = common.Ticker(60)
         self.texture_path = os.path.join("assets","sprites",texturepath)
         self.texture = None
-        self.still_anim = None
-        self.walking_anim = []
-        self.falling_anim = []
         self.collisions = {"left":False,"right":False,"top":False,"bottom":False}
         self.has_jumped = False
         self.texture_size = [constants.HALF_BLOCK_SIZE,constants.HALF_BLOCK_SIZE]
@@ -71,13 +68,15 @@ class Entity():
             self.name = "nova"
         if AItype=="mite":
             self.AIpointer = ai.mite
-            self.Animation = animation.simple
+            self.Animation = animation.mite_anim
+            self.max_speed = constants.MAX_SPEED*0.8
+            self.animation_ticks.threshold = 10
             self.name = "mite"
         for i in os.listdir(constants.PORTRAIT_PATH):
             item = i.split("-",1)
             if item[0]==self.name:
                 self.portraits.update({item[1].split(".",1)[0]:pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,i)),(32*constants.screen_scale,32*constants.screen_scale))})
-        print(self.portraits)
+        #print(self.portraits)
         self.overlay_active = False
         self.xp = xp
         self.overlay = common.loaded_level.camera_surface.copy()
@@ -87,15 +86,21 @@ class Entity():
         pygame.draw.circle(self.overlay,(24,24,24),(self.overlay.get_width()/2,self.overlay.get_height()/2),128)
         pygame.draw.circle(self.overlay,(40,40,40),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
         pygame.draw.circle(self.overlay,(64,64,64),(self.overlay.get_width()/2,self.overlay.get_height()/2),32)
-        #self.pallet = pygame.image.load(os.path.join(self.texture_path,"pallet.png"))
-        #self.still_anim = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"still.png")),self.pallet)
-        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking1.png")),self.pallet))
-        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking2.png")),self.pallet))
-        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking3.png")),self.pallet))
-        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking4.png")),self.pallet))
-        #self.walking_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"walking5.png")),self.pallet))
-        #self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling1.png")),self.pallet))
-        #self.falling_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"falling2.png")),self.pallet))
+        self.spritesheet = common.Spritesheet(os.path.join("assets","sprites",texturepath+"_sprites.png"))
+        self.palletized_sprites = []
+        self.pallet = 0
+        for i in self.spritesheet["pallets"]:
+            if i!=self.spritesheet["pallets"][0]:
+                data = {}
+                for j in self.spritesheet.keys():
+                    if type(j)==int:
+                        data2 = {"offset":self.spritesheet[j]["offset"]}
+                        for k in self.spritesheet[j]:
+                            if isinstance(self.spritesheet[j][k],pygame.Surface):
+                                data2.update({k:self.apply_pallet(self.spritesheet[j][k],i,self.spritesheet["pallets"][0])})
+                        data.update({j:data2})
+                self.palletized_sprites.append(data)
+        #print(self.palletized_sprites[0])
         if self.ai_type=="player":
             self.text_color = constants.CHAR_COLORS["nova"]
             self.animation_ticks.threshold = 35
@@ -105,32 +110,7 @@ class Entity():
             self.portraits.update({"sad":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-sad.png")),(32*constants.screen_scale,32*constants.screen_scale))})
             for i in range(constants.INV_WIDTH*constants.INV_HEIGHT-1):
                 self.inventory.update({"inv_"+str(i):None})
-            self.spritesheet = common.Spritesheet(os.path.join("assets","sprites","player_sprites.png"))
-            self.still_anim = self.apply_pallet(self.spritesheet[0][0],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0])
-            self.facing_away_img = self.apply_pallet(self.spritesheet[0][1],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0])
-            self.facing_away = False
-            self.walking_anim = []
-            self.falling_anim = []
-            self.arm_anim = []
-            for i in self.spritesheet[1]:
-                if type(self.spritesheet[1][i])==pygame.Surface:
-                    self.walking_anim.append(self.apply_pallet(self.spritesheet[1][i],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0]))
-            for i in self.spritesheet[2]:
-                if type(self.spritesheet[2][i])==pygame.Surface:
-                    self.falling_anim.append(self.apply_pallet(self.spritesheet[2][i],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0]))
-            for i in self.spritesheet[3]:
-                if type(self.spritesheet[3][i])==pygame.Surface:
-                    self.arm_anim.append(self.apply_pallet(self.spritesheet[3][i],self.spritesheet["pallets"][1],self.spritesheet["pallets"][0]))
-            print(self.arm_anim)
-            #self.facing_away_img = self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"away_still.png")),self.pallet)
-            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm1.png")),self.pallet))
-            #self.arm_anim[0] = pygame.transform.scale(self.arm_anim[0],(self.arm_anim[0].get_width()*constants.screen_scale,self.arm_anim[0].get_height()*constants.screen_scale))
-            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm2.png")),self.pallet))
-            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm3.png")),self.pallet))
-            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm4.png")),self.pallet))
-            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm5.png")),self.pallet))
-            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm6.png")),self.pallet))
-            #self.arm_anim.append(self.apply_pallet(pygame.image.load(os.path.join(self.texture_path,"arm7.png")),self.pallet)) 
+            self.facing_away = False 
     def Draw(self):
         self.Animation(self)
     def collide(self,side="bottom"):
@@ -344,8 +324,6 @@ def new_enemy(x,y,maxhp,type,xp=0):
     enemy.y = y
     enemy.max_hp = maxhp
     enemy.hp = maxhp
-    if type=="mite":
-        enemy.max_speed = constants.MAX_SPEED*1.4
     enemy.update_physics()
     if len(common.enemies)==0:
         common.enemies.append(enemy)
