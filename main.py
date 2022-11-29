@@ -127,6 +127,8 @@ def main():
                 menus.pause()
             elif common.menu=="seed":
                 menus.seed()
+            elif common.menu=="inventory":
+                menus.inventory()
             constants.disp_win.blit(constants.menu_surface,(0,0))
             pygame.display.update()
     json.dump(common.Settings,open("settings","w"),indent=4)

@@ -1,6 +1,7 @@
+from operator import inv
 import pygame
 import os,math
-from assets.managers import constants,common,level
+from assets.managers import constants,common,level,items
 border_color = (96,0,144)
 interior_color = (64,48,80)
 ui_path = os.path.join("assets","managers","menu_ui")
@@ -12,7 +13,7 @@ width_eighth = constants.menu_surface.get_width()/8
 height_eighth = constants.menu_surface.get_height()/8
 #title_ui.append(pygame.image.load(os.path.join("assets","managers","menu_ui","title_background.png")))
 class Button():
-    def __init__(self,rect,path,index):
+    def __init__(self,rect,path,index=0):
         self.rect = rect
         self.path = path
         self.text = pygame.image.load(os.path.join(constants.ui_path,path))
@@ -93,6 +94,40 @@ for i in enumerate(seed_ui):
 seed_ui.append(ui_background(width_eighth*6,height_eighth*7))
 seed_ui.append(pygame.transform.scale(pygame.image.load(os.path.join(ui_path,"seedselect.png")),(58*constants.screen_scale,14*constants.screen_scale)))
 seed_ui.append([])
+inventory_ui = [ui_background(width_eighth*6,height_eighth*6)]
+inventory_ui.append(pygame.transform.scale(pygame.image.load(os.path.join(ui_path,"inventory.png")),(128*constants.screen_scale,14*constants.screen_scale)))
+inventory_ui.append({})
+inventory_ui.append({})
+for i in range(constants.INV_WIDTH*constants.INV_HEIGHT):
+    button = Button(pygame.Rect(0,0,32*constants.screen_scale,32*constants.screen_scale),"inventory_item.png")
+    button.surface = pygame.image.load(os.path.join(ui_path,button.path))
+    surface2 = button.surface.copy()
+    arr = pygame.PixelArray(surface2)
+    arr.replace((192,111,219),(110,161,216))
+    arr.replace((154,89,175),(88,129,173))
+    arr.replace((103,71,114),(70,90,112))
+    arr.close()
+    button.down_surface = surface2
+    button.surface = pygame.transform.scale(button.surface,(32*constants.screen_scale,32*constants.screen_scale))
+    button.down_surface = pygame.transform.scale(button.down_surface,(32*constants.screen_scale,32*constants.screen_scale))
+    button.rect.x = (i%constants.INV_WIDTH*34+43)*constants.screen_scale
+    button.rect.y = (math.floor(i/constants.INV_WIDTH)*34+94)*constants.screen_scale
+    inventory_ui[2].update({i:button})
+for i in range(3):
+    button = Button(pygame.Rect(0,0,32*constants.screen_scale,32*constants.screen_scale),"inventory_item.png")
+    button.surface = pygame.image.load(os.path.join(ui_path,button.path))
+    surface2 = button.surface.copy()
+    arr = pygame.PixelArray(surface2)
+    arr.replace((192,111,219),(110,161,216))
+    arr.replace((154,89,175),(88,129,173))
+    arr.replace((103,71,114),(70,90,112))
+    arr.close()
+    button.down_surface = surface2
+    button.surface = pygame.transform.scale(button.surface,(32*constants.screen_scale,32*constants.screen_scale))
+    button.down_surface = pygame.transform.scale(button.down_surface,(32*constants.screen_scale,32*constants.screen_scale))
+    button.rect.x = (34*i+43)*constants.screen_scale
+    button.rect.y = 42*constants.screen_scale
+    inventory_ui[3].update({i:button})
 def title():
     global menu_ticks
     constants.menu_surface.fill((0,1,0,0))
@@ -168,6 +203,8 @@ def seed():
             seed_ui[18]=[]
     if common.KeyDirect(pygame.K_RETURN):
         common.menu = None
+        if len(seed_ui[18])==0:
+            seed_ui[18] = "0000000000000000"
         e = ""
         for i in seed_ui[18]:
             e+=i
@@ -175,3 +212,23 @@ def seed():
             seed_ui[18]+="0"*(16-len(e))
         common.run.reload(0,int(e,16))
     common.Font((0,1,0),pygame.Rect(width_eighth*3.25,height_eighth,width_eighth*4.75,height_eighth*2),seed_ui[18]+[None],2,constants.menu_surface)
+def inventory():
+    constants.menu_surface.fill((0,0,0))
+    constants.menu_surface.blit(inventory_ui[1],(width_eighth*4-(inventory_ui[1].get_width()/2),height_eighth*0.25))
+    constants.menu_surface.blit(inventory_ui[0],(width_eighth,height_eighth))
+    pygame.draw.rect(constants.menu_surface,(0,1,0),pygame.Rect(inventory_ui[2][0].rect.x-constants.screen_scale,inventory_ui[2][0].rect.y-constants.screen_scale,34*constants.INV_WIDTH*constants.screen_scale,34*constants.INV_HEIGHT*constants.screen_scale))
+    pygame.draw.rect(constants.menu_surface,(0,1,0),pygame.Rect(inventory_ui[3][0].rect.x-constants.screen_scale,inventory_ui[3][0].rect.y-constants.screen_scale,102*constants.screen_scale,34*constants.screen_scale))
+    common.Font((0,1,0),pygame.Rect(72*constants.screen_scale,30*constants.screen_scale,150*constants.screen_scale,100*constants.screen_scale),"actions ",2,constants.menu_surface)
+    common.Font((0,1,0),pygame.Rect(106*constants.screen_scale,81*constants.screen_scale,150*constants.screen_scale,100*constants.screen_scale),"storage ",2,constants.menu_surface)
+    for i in inventory_ui[2]:
+        inventory_ui[2][i].Draw()
+    for i in inventory_ui[3]:
+        inventory_ui[3][i].Draw()
+    for i in common.player.inventory.keys():
+        if type(common.player.inventory[i])==items.Item:
+            if i.startswith("inv_"):
+                constants.menu_surface.blit(common.player.inventory[i].inv_texture,inventory_ui[2][int(i[4])])
+            else:
+                constants.menu_surface.blit(common.player.inventory[i].inv_texture,inventory_ui[3][int(i[5])])
+    if common.PressedKeys[pygame.K_ESCAPE]:
+        common.menu = None

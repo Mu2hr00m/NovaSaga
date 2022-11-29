@@ -119,7 +119,7 @@ def player_anim(self):
             animation_type = 2
     #print(str(self.animation_ticks)+", "+str(self.x_vel))
     if common.GetPressed("action1"):
-        arm_image = spritesheet[3][0]
+        arm_image = pygame.transform.scale(spritesheet[3][0],(spritesheet[3][0].get_width()*constants.screen_scale,spritesheet[3][0].get_height()*constants.screen_scale))
         arm_image.blit(self.inventory["main_0"].texture,(int((arm_image.get_width()-constants.screen_scale)/2),int((arm_image.get_height()-constants.screen_scale)/2)))
         angle = self.angle
         w_offset = -constants.screen_scale/2

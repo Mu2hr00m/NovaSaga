@@ -7,8 +7,9 @@ class Item():
         self.id = id
         self.type = type
         self.cooldown = cooldown
-        self.texture = pygame.image.load(os.path.join(constants.ITEM_PATH,texture))
-        self.texture = pygame.transform.scale(self.texture,(self.texture.get_width()*constants.screen_scale,self.texture.get_height()*constants.screen_scale))
+        self.spritesheet = common.Spritesheet(os.path.join(constants.ITEM_PATH,texture))
+        self.texture = pygame.transform.scale(self.spritesheet[0][0],(self.spritesheet[0][0].get_width()*constants.screen_scale,self.spritesheet[0][0].get_height()*constants.screen_scale))
+        self.inv_texture = pygame.transform.scale(self.spritesheet[1][0],(self.spritesheet[1][0].get_width()*constants.screen_scale,self.spritesheet[1][0].get_height()*constants.screen_scale))
         self.on_use = on_use
 def basic(self):
     spread = random.randint(-2,2)

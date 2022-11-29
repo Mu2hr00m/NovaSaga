@@ -49,6 +49,8 @@ def playerAI(self):
         if common.GetPressed("action3"):
             if self.inventory["main_2"]!=None:
                 self.inventory["main_2"].on_use(self.inventory["main_2"])
+        if common.GetPressed("inventory"):
+            common.menu = "inventory"
         if pygame.mouse.get_focused():
             #game_classes.boxes[len(game_classes.boxes)-1].rect.x = pygame.mouse.get_pos()[0]
             #game_classes.boxes[len(game_classes.boxes)-1].rect.y = pygame.mouse.get_pos()[1]

@@ -13,7 +13,10 @@ class Entity():
         arr.close()
         return surface
     def kill(self):
-        common.enemies[self.index] = None
+        if self.name!="nova":
+            common.enemies[self.index] = None
+        else:
+            print("game over") #this will eventually trigger game over cutscene, right now it fixes a crash
     def damage(self,amount=1):
         if not self.iframes.active:
             self.hp-=amount
