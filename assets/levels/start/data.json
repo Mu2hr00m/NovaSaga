@@ -30,8 +30,14 @@
             "h":30,
             "behavior":"FallingDust",
             "freq":0.00005,
-            "duration":20,
-            "color":[192,128,255]
+            "duration":200,
+            "variation":20,
+            "color":{
+                "color1":[255,0,0],
+                "color2":[0,255,0],
+                "frequency":100,
+                "color_index":1
+            }
         }
     ]
 }

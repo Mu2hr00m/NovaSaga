@@ -212,7 +212,7 @@ class Level():
             pass
         if data.get("particle_spawners",None)!=None:
             for i in data["particle_spawners"]:
-                common.particle_spawners.append(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"]))
+                common.particle_spawners.append(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"],i["variation"]))
         k=0
         m=0
         boxrectlist = []                                                     #all this is the algorithm for making the boxes

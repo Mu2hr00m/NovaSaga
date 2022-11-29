@@ -1,5 +1,5 @@
 from assets.managers import constants
-import pygame,time,os,pathlib,json
+import pygame,time,os,pathlib,json,random
 class Placeholder():
     def __init__(self,attrs):
         for i in attrs:
@@ -24,6 +24,18 @@ class Ticker():
             self.tick+=amount
         if self.tick>=self.threshold:
             self.tick = 0
+    def Reflect(self,amount=1):
+        if self.tick>-1:
+            if self.active:
+                self.tick+=amount
+                if self.tick>self.threshold:
+                    self.tick = self.threshold
+                    self.active = False
+            else:
+                self.tick-=amount
+                if self.tick<0:
+                    self.tick = 0
+                    self.active = True
     def Trigger(self):
         if self.tick==-1:
             self.tick = 0
@@ -41,6 +53,25 @@ def GetPressed(control)->bool:
                 return PressedKeysNoCooldown["mouse2"]
     else:
         return PressedKeysNoCooldown[Key]
+class DynamicColor():
+    def __init__(self,color1:pygame.Color,color2:pygame.Color,color_index:int,frequency:int,include_alpha=False):
+        self.color1 = color1
+        self.color2 = color2
+        self.index = color_index
+        self.frequency = frequency
+        self.alpha = include_alpha
+        self.previous_color = None
+        self.ticker = Ticker(frequency)
+        self.ticker.Trigger()
+    def call(self):
+        if self.index==0:
+            self.previous_color = self.color1.lerp(self.color2,random.random())
+        elif self.index==1:
+            self.ticker.Reflect()
+            self.previous_color = self.color1.lerp(self.color2,self.ticker.tick/self.ticker.threshold)
+        return self.previous_color
+    def copy(self):
+        return DynamicColor(self.color1,self.color2,self.index,self.frequency,self.alpha)
 def KeyDirect(key)->bool:
     return PressedKeys[key]
 def ReloadSettings():
