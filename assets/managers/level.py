@@ -207,7 +207,8 @@ class Level():
             pass
         try:
             for i in data["enemies"]:
-                entity.new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
+                if i.get("always_spawns",False): #addenemies with the always_spawns tag as true, defaults to false
+                    entity.new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
         except:
             pass
         if data.get("particle_spawners",None)!=None:

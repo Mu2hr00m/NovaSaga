@@ -24,19 +24,19 @@
     ],
     "particle_spawners": [
         {
-            "x":60,
-            "y":60,
-            "w":30,
-            "h":30,
-            "behavior":"FallingDust",
-            "freq":0.00005,
+            "x":454,
+            "y":48,
+            "w":2,
+            "h":2,
+            "behavior":"Spark",
+            "freq":0.005,
             "duration":200,
             "variation":20,
             "color":{
-                "color1":[255,0,0],
-                "color2":[0,255,0],
+                "color1":[255,128,0],
+                "color2":[255,255,64],
                 "frequency":100,
-                "color_index":1
+                "color_index":2
             }
         }
     ]

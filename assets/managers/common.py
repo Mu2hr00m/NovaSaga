@@ -19,6 +19,10 @@ class Ticker():
     def SafeTick(self,amount=1):
         if self.tick>=0 and self.tick<self.threshold:
             self.tick+=amount
+            if self.tick<0:
+                self.tick = 0
+            if self.tick>self.threshold:
+                self.tick = self.threshold
     def Loop(self,amount=1):
         if self.tick>=0:
             self.tick+=amount
@@ -60,7 +64,7 @@ class DynamicColor():
         self.index = color_index
         self.frequency = frequency
         self.alpha = include_alpha
-        self.previous_color = None
+        self.previous_color = self.color1.lerp(self.color2,0.5)
         self.ticker = Ticker(frequency)
         self.ticker.Trigger()
     def call(self):
@@ -68,6 +72,14 @@ class DynamicColor():
             self.previous_color = self.color1.lerp(self.color2,random.random())
         elif self.index==1:
             self.ticker.Reflect()
+            self.previous_color = self.color1.lerp(self.color2,self.ticker.tick/self.ticker.threshold)
+        elif self.index==2:
+            if self.ticker.tick<self.ticker.threshold/3:
+                self.ticker.SafeTick(random.randint(-3,5))
+            elif self.ticker.tick>self.ticker.threshold/3*2:
+                self.ticker.SafeTick(random.randint(-5,3))
+            else:
+                self.ticker.SafeTick(random.randint(-4,4))
             self.previous_color = self.color1.lerp(self.color2,self.ticker.tick/self.ticker.threshold)
         return self.previous_color
     def copy(self):
