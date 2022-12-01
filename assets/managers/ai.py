@@ -38,17 +38,13 @@ def playerAI(self):
         self.update_physics(common.GetPressed("jump"),common.GetPressed("left"),common.GetPressed("right"))
         for i in self.inventory:
             if self.inventory[i]!=None:
-                if self.inventory[i].type=="gun":
-                    self.inventory[i].cooldown.Tick()
-        if common.GetPressed("action1"):
-            if self.inventory["main_0"]!=None:
-                self.inventory["main_0"].on_use(self.inventory["main_0"])
-        if common.GetPressed("action2"):
-            if self.inventory["main_1"]!=None:
-                self.inventory["main_1"].on_use(self.inventory["main_1"])
-        if common.GetPressed("action3"):
-            if self.inventory["main_2"]!=None:
-                self.inventory["main_2"].on_use(self.inventory["main_2"])
+                self.inventory[i].cooldown.Tick()
+        if common.GetPressed("action1") and self.inventory["main_0"]!=None:
+            self.inventory["main_0"].on_use(self.inventory["main_0"])
+        elif common.GetPressed("action2") and self.inventory["main_1"]!=None:
+            self.inventory["main_1"].on_use(self.inventory["main_1"])
+        elif common.GetPressed("action3") and self.inventory["main_2"]!=None:
+            self.inventory["main_2"].on_use(self.inventory["main_2"])
         if common.GetPressed("inventory"):
             common.menu = "inventory"
         if pygame.mouse.get_focused():

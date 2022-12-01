@@ -19,7 +19,7 @@
             "hp": 5,
             "x": 155,
             "y": 100,
-            "always_spawns": true
+            "always_spawns": false
         }
     ],
     "particle_spawners": [

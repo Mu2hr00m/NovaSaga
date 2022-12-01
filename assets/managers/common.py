@@ -47,6 +47,8 @@ class Ticker():
     def Reset(self):
         self.tick = -1
         self.active = False
+def Scale(surface:pygame.Surface,factor:float=constants.screen_scale)->pygame.Surface:
+    return pygame.transform.scale(surface,(surface.get_width()*factor,surface.get_height()*factor))
 def GetPressed(control)->bool:
     Key = Keybinds[control]
     if type(Key)==str:
@@ -55,6 +57,8 @@ def GetPressed(control)->bool:
                 return PressedKeysNoCooldown["mouse1"]
             elif Key=="rclick":
                 return PressedKeysNoCooldown["mouse2"]
+            else:
+                return PressedKeysNoCooldown[Key]
     else:
         return PressedKeysNoCooldown[Key]
 class DynamicColor():

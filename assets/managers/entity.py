@@ -107,11 +107,11 @@ class Entity():
         if self.ai_type=="player":
             self.text_color = constants.CHAR_COLORS["nova"]
             self.animation_ticks.threshold = 35
-            self.inventory = {"main_1":None,"main_2":None,"main_3":None}
+            self.inventory = {"main_1":None,"main_2":None,"main_3":None,"cursor":None}
             self.portraits.update({"happy":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-happy.png")),(32*constants.screen_scale,32*constants.screen_scale))})
             self.portraits.update({"neutral":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-neutral.png")),(32*constants.screen_scale,32*constants.screen_scale))})
             self.portraits.update({"sad":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"nova-sad.png")),(32*constants.screen_scale,32*constants.screen_scale))})
-            for i in range(constants.INV_WIDTH*constants.INV_HEIGHT-1):
+            for i in range(constants.INV_WIDTH*constants.INV_HEIGHT):
                 self.inventory.update({"inv_"+str(i):None})
             self.facing_away = False 
     def Draw(self):

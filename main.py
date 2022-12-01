@@ -90,7 +90,7 @@ def main():
             elif pygame.mouse.get_focused():
                 common.PressedKeysNoCooldown[i]=pygame.mouse.get_pressed(5)[int(i[5])-1]
         if pygame.mouse.get_focused():
-            for i in enumerate(pygame.mouse.get_pressed()):
+            for i in enumerate(pygame.mouse.get_pressed(5)):
                 i = ("mouse"+str(i[0]+1),i[1])
                 if common.KeyCooldown[i[0]].active:
                     common.KeyCooldown[i[0]].Tick()

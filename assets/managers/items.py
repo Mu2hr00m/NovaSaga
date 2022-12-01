@@ -8,8 +8,8 @@ class Item():
         self.type = type
         self.cooldown = cooldown
         self.spritesheet = common.Spritesheet(os.path.join(constants.ITEM_PATH,texture))
-        self.texture = pygame.transform.scale(self.spritesheet[0][0],(self.spritesheet[0][0].get_width()*constants.screen_scale,self.spritesheet[0][0].get_height()*constants.screen_scale))
-        self.inv_texture = pygame.transform.scale(self.spritesheet[1][0],(self.spritesheet[1][0].get_width()*constants.screen_scale,self.spritesheet[1][0].get_height()*constants.screen_scale))
+        self.texture = self.spritesheet[0][0]
+        self.inv_texture = common.Scale(self.spritesheet[1][0])
         self.on_use = on_use
 def basic(self):
     spread = random.randint(-2,2)
@@ -23,4 +23,4 @@ def gun2(self):
         projectile.new_projectile(projectile.Bullet(common.player.x,common.player.y,common.player.angle+spread,"bullet.png",3,1,0,3))
 items = {}
 items.update({"gun":Item(basic,"gun","gun.png",basic,common.Ticker(30))})
-items.update({"gun2":Item(gun2,"gun","gun.png",basic,common.Ticker(40))})
+items.update({"gun2":Item(gun2,"gun","gun.png",gun2,common.Ticker(40))})

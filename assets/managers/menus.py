@@ -222,13 +222,19 @@ def inventory():
     common.Font((0,1,0),pygame.Rect(106*constants.screen_scale,81*constants.screen_scale,150*constants.screen_scale,100*constants.screen_scale),"storage ",2,constants.menu_surface)
     for i in inventory_ui[2]:
         inventory_ui[2][i].Draw()
+        if inventory_ui[2][i].rect.collidepoint(pygame.mouse.get_pos()) and common.PressedKeys["mouse1"]:
+            common.player.inventory["cursor"],common.player.inventory["inv_"+str(i)] = common.player.inventory["inv_"+str(i)],common.player.inventory["cursor"]
     for i in inventory_ui[3]:
         inventory_ui[3][i].Draw()
+        if inventory_ui[3][i].rect.collidepoint(pygame.mouse.get_pos()) and common.PressedKeys["mouse1"]:
+            common.player.inventory["cursor"],common.player.inventory["main_"+str(i)] = common.player.inventory["main_"+str(i)],common.player.inventory["cursor"]
     for i in common.player.inventory.keys():
-        if type(common.player.inventory[i])==items.Item:
+        if type(common.player.inventory[i])==items.Item and i!="cursor":
             if i.startswith("inv_"):
                 constants.menu_surface.blit(common.player.inventory[i].inv_texture,inventory_ui[2][int(i[4])])
             else:
                 constants.menu_surface.blit(common.player.inventory[i].inv_texture,inventory_ui[3][int(i[5])])
+    if type(common.player.inventory["cursor"])==items.Item:
+        constants.menu_surface.blit(common.player.inventory["cursor"].inv_texture,pygame.mouse.get_pos())
     if common.PressedKeys[pygame.K_ESCAPE]:
         common.menu = None

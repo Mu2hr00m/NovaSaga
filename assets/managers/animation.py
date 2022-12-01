@@ -117,10 +117,16 @@ def player_anim(self):
             self.animation_ticks.tick = 1
             self.facing_away = False
             animation_type = 2
-    #print(str(self.animation_ticks)+", "+str(self.x_vel))
-    if common.GetPressed("action1"):
-        arm_image = pygame.transform.scale(spritesheet[3][0],(spritesheet[3][0].get_width()*constants.screen_scale,spritesheet[3][0].get_height()*constants.screen_scale))
-        arm_image.blit(self.inventory["main_0"].texture,(int((arm_image.get_width()-constants.screen_scale)/2),int((arm_image.get_height()-constants.screen_scale)/2)))
+    using_something = False
+    if common.GetPressed("action1") or common.GetPressed("action2") or common.GetPressed("action3"):
+        using_something = True
+        arm_image = spritesheet[3][0].copy()
+        if common.GetPressed("action1") and self.inventory["main_0"]!=None:
+            arm_image.blit(self.inventory["main_0"].texture,(int((arm_image.get_width()-constants.screen_scale)/2),int((arm_image.get_height()-constants.screen_scale)/2)))
+        elif common.GetPressed("action2") and self.inventory["main_1"]!=None:
+            arm_image.blit(self.inventory["main_1"].texture,(int((arm_image.get_width()-constants.screen_scale)/2),int((arm_image.get_height()-constants.screen_scale)/2)))
+        elif common.GetPressed("action3") and self.inventory["main_2"]!=None:
+            arm_image.blit(self.inventory["main_2"].texture,(int((arm_image.get_width()-constants.screen_scale)/2),int((arm_image.get_height()-constants.screen_scale)/2)))
         angle = self.angle
         w_offset = -constants.screen_scale/2
         h_offset = -constants.screen_scale*1.5
@@ -130,6 +136,7 @@ def player_anim(self):
         else:
             self.anim_flip = False
         angle-=180
+        arm_image = common.Scale(arm_image)
         if not pos[0]<=pygame.mouse.get_pos()[0]:
             arm_image = pygame.transform.flip(arm_image,True,False)
         angle*=-1
@@ -147,7 +154,7 @@ def player_anim(self):
     offset = spritesheet[animation_type]["offset"]
     arm_offset = spritesheet[3]["offset"]
     constants.WIN.blit(image,(self.hitbox.x+offset[0],self.hitbox.y+offset[1]))
-    if not common.GetPressed("action1") and not self.facing_away:
+    if not using_something and not self.facing_away:
         constants.WIN.blit(arm_image,(self.hitbox.x+arm_offset[0],self.hitbox.y+arm_offset[1]))
     if keys[pygame.K_p]:
         common.run = level.Run(0,os.urandom(16))
