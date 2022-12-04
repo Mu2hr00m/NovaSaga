@@ -187,33 +187,30 @@ class Level():
         self.hud = pygame.surface.Surface((constants.disp_win.get_width(),constants.disp_win.get_height())) #make a hud, where hp and such will go
         self.hud.set_colorkey((0,0,0,255)) #allow hud to be transparent
         common.boxes.clear()                      #clear out various lists, in case they have stuff left over from the previous level
-        common.level_transitions.clear()
-        common.enemies.clear()
-        common.projectiles.clear()
         common.particles.clear()
-        common.particle_spawners.clear()
+        common.entities.clear()
         try:
             for i in data["boxes"]:
-                common.boxes.append(Box(pygame.Rect(i["x"],i["y"],i["w"],i["h"]))) #add extra boxes w/o collision
+                common.NewThing(Box(pygame.Rect(i["x"],i["y"],i["w"],i["h"])),common.boxes) #add extra boxes w/o collision
         except:
             pass
         try:
             for i in data["level_transitions"]:
                 if i["style"]=="old":
-                    common.level_transitions.append(entity.TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"])) #add level transitions
+                    common.NewThing(entity.TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"])) #add level transitions
                 elif i["style"]=="new":
-                    common.level_transitions.append(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])))
+                    common.NewThing(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])))
         except:
             pass
         try:
             for i in data["enemies"]:
                 if i.get("always_spawns",False): #addenemies with the always_spawns tag as true, defaults to false
-                    entity.new_enemy(i["x"],i["y"],i["hp"],i["type"]) #add enemies
+                    entity.new_entity(i["x"],i["y"],i["hp"],i["type"]) #add enemies
         except:
             pass
         if data.get("particle_spawners",None)!=None:
             for i in data["particle_spawners"]:
-                common.particle_spawners.append(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"],i["variation"]))
+                common.NewThing(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"],i["variation"]))
         k=0
         m=0
         boxrectlist = []                                                     #all this is the algorithm for making the boxes
@@ -249,7 +246,7 @@ class Level():
                     if not (newbox.w==0 or newbox.h==0): #check that the rect isnt invalid
                         boxrectlist.append(newbox)       #then add the box
         for i in boxrectlist:     #for every rect in the box list, make an actual Box class
-            common.boxes.append(Box(i))
+            common.NewThing(Box(i),common.boxes)
     def update_camera(self,pos=None):
         if pos!=None:                #make a hook for placing the camera wherever
             self.camera[0] = pos[0]

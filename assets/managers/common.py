@@ -1,5 +1,5 @@
 from assets.managers import constants
-import pygame,time,os,pathlib,json,random
+import pygame,time,os,pathlib,json,random,uuid
 class Placeholder():
     def __init__(self,attrs):
         for i in attrs:
@@ -112,11 +112,11 @@ def ReloadSettings():
         Keybinds = file["keybindings"]
     if __name__=="__constants__":
         pygame.quit()
-def out_of_bounds(pos):
+def out_of_bounds(pos,safety = 0):
     oob = False
-    if pos[0]<0 or pos[0]>constants.WIN.get_width()-1:
+    if pos[0]<safety or pos[0]>constants.WIN.get_width()-1-safety:
         oob = True
-    if pos[1]<0 or pos[1]>constants.WIN.get_height()-1:
+    if pos[1]<safety or pos[1]>constants.WIN.get_height()-1-safety:
         oob = True
     return oob
 def Font(color,rect=pygame.Rect,text=str,size=1,dest_surface=loaded_level.hud):
@@ -191,14 +191,19 @@ def Spritesheet(path:str):
         data.update({i:row_data})
         row_index+=pixel_2.g
     return data
+entities = {}
+boxes = {}
+particles = {}
+newentities = {}
+newparticles = {}
+delentities = []
+delparticles = []
+Entity,Dust,ParticleArea,Bullet,DynamicLevelTransition,Level = None,None,None,None,None,None
+def NewThing(thing,dest:dict=newentities):
+    thing.uuid = str(uuid.uuid4())
+    dest.update({thing.uuid:thing})
 Settings = None
 Keybinds = None
-enemies = []
-projectiles = []
-level_transitions = []
-boxes = []
-particles = []
-particle_spawners = []
 active_text = None
 player = None
 e=None

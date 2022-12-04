@@ -1,22 +1,11 @@
 from assets.managers import common,constants
 import pygame,random,math
-def NewParticle(particle):
-    if len(common.particles)==0:
-        common.particles.append(particle)
-    else:
-        for i in range(len(common.particles)):
-            if common.particles[i]==None:
-                particle.index = i
-                common.particles[i] = particle
-                break
-            elif i==len(common.particles)-1:
-                particle.index = i+1
-                common.particles.append(particle)
 class ParticleArea():
     def __init__(self,rect,freq,color,behavior,duration,variation):
         self.rect = rect
         self.freq = freq
         self.color = color
+        self.uuid = "0-0-0-0"
         self.behavior = BehaviorMap[behavior]
         self.duration = duration
         self.variation = variation
@@ -28,7 +17,7 @@ class ParticleArea():
                         duration = random.randint(self.duration-self.variation,self.duration+self.variation)
                     else:
                         duration = self.duration
-                    NewParticle(Dust([i+self.rect.x,j+self.rect.y],self.behavior,self.color,duration))
+                    common.NewThing(Dust([i+self.rect.x,j+self.rect.y],self.behavior,self.color,duration),common.newparticles)
 class Dust():
     def __init__(self,pos,behavior,color,duration):
         self.pos = pos
@@ -36,14 +25,14 @@ class Dust():
         if type(color)==dict:
             color = common.DynamicColor(pygame.Color(color["color1"][0],color["color1"][1],color["color1"][2]),pygame.Color(color["color2"][0],color["color2"][1],color["color2"][2]),color["color_index"],color["frequency"],color.get("alpha",False))
         self.color = color
-        self.index = 0
         self.x_vel = 0
         self.y_vel = 0
+        self.uuid = "0-0-0-0"
         self.duration = common.Ticker(duration)
         self.duration.Trigger()
     def kill(self):
-        common.particles[self.index] = None
-    def draw(self):
+        common.delparticles.append(self.uuid)
+    def Draw(self):
         self.duration.Tick()
         self.behavior(self)
         if not self.duration.active:

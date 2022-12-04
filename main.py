@@ -9,8 +9,9 @@ from assets.managers import constants
 from assets.managers import ai
 from assets.managers import menus
 from assets.managers import items
-from assets.managers import projectile
+from assets.managers import projectile,particle
 from assets.managers import level,cutscene
+common.Entity,common.DynamicLevelTransition,common.Dust,common.Level,common.Bullet,common.ParticleArea = entity.Entity,entity.DynamicTransitionObject,particle.Dust,level.Level,projectile.Bullet,particle.ParticleArea
 def abs(num):
     if num<0:
         num *= -1
@@ -23,24 +24,21 @@ def draw():
     constants.WIN.fill((48,48,48))
     common.loaded_level.hud.fill((0,0,0,255))
     common.loaded_level.update_camera()
-    for box in common.boxes:
+    for box in common.boxes.items():
+        box=box[1]
         box.Draw()
     constants.WIN.blit(common.loaded_level.display_texture,(0,0))
     if common.player.overlay_active:
         constants.WIN.blit(common.player.overlay,(common.player.x-(constants.CAM_WIDTH*1.5)-1,common.player.y-(constants.CAM_HEIGHT*1.5)))
-    for i in common.enemies:
-        if i!=None:
-            i.Animation(i)
-    for i in common.projectiles:
-        if i!=None:
-            i.draw()
-    for i in common.particles:
-        if i!=None:
-            i.draw()
-    #for box in game_classes.boxes:
-        #box.afterdraw()
-    for i in common.level_transitions:
-        pygame.draw.rect(constants.WIN,(128,128,128),i.rect)
+    for i in common.entities.items():
+        i = i[1]
+        if callable(getattr(i,"Draw",None)):
+            i.Draw()
+        elif type(i)==entity.DynamicTransitionObject:
+            pygame.draw.rect(constants.WIN,(128,128,128),i.rect)
+    for i in common.particles.items():
+        i = i[1]
+        i.Draw()
     common.player.Draw()
     if common.active_text!=None:
         common.active_text.update()
@@ -108,17 +106,31 @@ def main():
         if common.menu==None:
             menus.menu_ticks.Trigger()
             common.player.AIpointer(common.player)
-            for i in common.enemies:
-                if i!=None:
+            for i in common.entities.items():
+                i = i[1]
+                if type(i)==entity.Entity:
                     i.AIpointer(i)
-            for i in common.projectiles:
-                if i!=None:
+                elif type(i)==projectile.Bullet:
                     i.update()
-            for i in common.level_transitions:
-                i.check()
-            for i in common.particle_spawners:
-                i.spawn_particles()
+                elif type(i)==entity.DynamicTransitionObject:
+                    i.check()
+                elif type(i)==entity.TransitionObject:
+                    pass
+                elif type(i)==particle.ParticleArea:
+                    i.spawn_particles()
+            for i in common.particles.items():
+                i[1].behavior(i[1])
             draw()
+            common.entities.update(common.newentities)
+            common.particles.update(common.newparticles)
+            common.newentities.clear()
+            common.newparticles.clear()
+            for i in common.delentities:
+                del common.entities[i]
+            for i in common.delparticles:
+                del common.particles[i]
+            common.delentities.clear()
+            common.delparticles.clear()
         else:
             menus.menu_ticks.Tick()
             if common.menu=="main":

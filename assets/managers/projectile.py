@@ -3,18 +3,6 @@ from assets.managers import constants
 from assets.managers import common
 import math
 import os
-def new_projectile(projectile):
-    if len(common.projectiles)==0:
-        common.projectiles.append(projectile)
-    else:
-        for i in range(len(common.projectiles)):
-            if common.projectiles[i]==None:
-                projectile.index = i
-                common.projectiles[i] = projectile
-                break
-            elif i==len(common.projectiles)-1:
-                projectile.index = i+1
-                common.projectiles.append(projectile)
 class Bullet():
     def __init__(self,x,y,angle,texture,speed,damage,pierce=0,bounce=0,gravity=constants.DEF_GRAVITY/3):
         self.x = x
@@ -22,8 +10,8 @@ class Bullet():
         self.x_vel = math.cos(math.radians(angle))*speed
         self.y_vel = math.sin(math.radians(angle))*speed
         self.speed = speed
+        self.uuid = "0-0-0-0"
         self.texture = pygame.image.load(os.path.join(constants.PROJ_PATH,texture))
-        #self.texture = pygame.transform.scale(self.texture,(self.texture.get_width()*constants.screen_scale,self.texture.get_height()*constants.screen_scale))
         self.index = 0
         self.damage = damage
         self.pierce = pierce
@@ -31,13 +19,14 @@ class Bullet():
         self.gravity = gravity
         self.damage_ticks = 0
     def kill(self):
-        common.projectiles[self.index]=None
+        if common.delentities.count(self.uuid)==0:
+            common.delentities.append(self.uuid)
     def update(self):
         if self.y_vel>10:
             self.y_vel=10
         else:
             self.y_vel+=self.gravity
-        if self.x+self.x_vel<constants.WIN.get_width()-1 and self.y+self.y_vel<constants.WIN.get_height()-1 and self.x+self.x_vel>1 and self.y+self.y_vel>1:
+        if not common.out_of_bounds((self.x,self.y),2) and not common.out_of_bounds((self.x+self.x_vel,self.y+self.y_vel),2):
             x_step = self.x_vel/self.speed
             y_step = self.y_vel/self.speed
             total_x=0
@@ -64,12 +53,13 @@ class Bullet():
             self.y+=total_y
         else:
             self.kill()
-        for i in common.enemies:
-            if i!=None:
-                if i.hitbox.collidepoint((self.x,self.y)):
+        for i in common.entities:
+            i = common.entities[i]
+            if type(i)==common.Entity:
+               if i.hitbox.collidepoint((self.x,self.y)):
                     i.damage(self.damage)
                     self.pierce-=1
                     if self.pierce<0:
                         self.kill()
-    def draw(self):
+    def Draw(self):
         constants.WIN.blit(self.texture,(self.x-1,self.y-1))

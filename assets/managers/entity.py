@@ -14,11 +14,12 @@ class Entity():
         return surface
     def kill(self):
         if self.name!="nova":
-            common.enemies[self.index] = None
+            if common.delentities.count(self.uuid)==0:
+                common.delentities.append(self.uuid)
         else:
             print("game over") #this will eventually trigger game over cutscene, right now it fixes a crash
     def damage(self,amount=1):
-        if not self.iframes.active:
+        if (self.iframes.active,self.invulnerable)==(False,False):
             self.hp-=amount
             self.iframes.Trigger()
             if self.hp<=0:
@@ -34,6 +35,7 @@ class Entity():
         self.iframes = common.Ticker(10)
         self.text_color = constants.CHAR_COLORS["default"]
         self.has_control = True
+        self.invulnerable = False
         self.ground_drag = constants.DEF_GROUND_DRAG
         self.air_drag = constants.DEF_AIR_DRAG
         self.grav = constants.DEF_GRAVITY
@@ -44,7 +46,7 @@ class Entity():
         self.jump = constants.DEF_JUMP
         self.anim_flip = False
         self.ai_type = AItype
-        self.index = 0
+        self.uuid = "0-0-0-0"
         self.portraits = {"default":pygame.transform.scale(pygame.image.load(os.path.join(constants.PORTRAIT_PATH,"default.png")),(32*constants.screen_scale,32*constants.screen_scale))}
         self.x = 0
         self.y = 0
@@ -321,21 +323,11 @@ class DynamicTransitionObject():
                     if i.id==self.dest_id:
                         common.player.x = i.dest[0]
                         common.player.y = i.dest[1]
-def new_enemy(x,y,maxhp,type,xp=0):
-    enemy = Entity(type,type,xp)
-    enemy.x = x
-    enemy.y = y
-    enemy.max_hp = maxhp
-    enemy.hp = maxhp
-    enemy.update_physics()
-    if len(common.enemies)==0:
-        common.enemies.append(enemy)
-    else:
-        for i in range(len(common.enemies)):
-            if common.enemies[i]==None:
-                enemy.index = i
-                common.enemies[i] = enemy
-                break
-            elif i==len(common.enemies)-1:
-                enemy.index = i+1
-                common.enemies.append(enemy)
+def new_entity(x,y,maxhp,type,xp=0):
+    entity = Entity(type,type,xp)
+    entity.x = x
+    entity.y = y
+    entity.max_hp = maxhp
+    entity.hp = maxhp
+    entity.update_physics()
+    common.NewThing(entity)

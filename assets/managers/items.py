@@ -15,12 +15,12 @@ def basic(self):
     spread = random.randint(-2,2)
     if not self.cooldown.active:
         self.cooldown.Trigger()
-        projectile.new_projectile(projectile.Bullet(common.player.x,common.player.y,common.player.angle+spread,"bullet.png",10,1,0,3))
+        common.NewThing(projectile.Bullet(common.player.x,common.player.y,common.player.angle+spread,"bullet.png",10,1,0,3),common.newentities)
 def gun2(self):
     spread = random.randint(-7,7)
     if not self.cooldown.active:
         self.cooldown.Trigger()
-        projectile.new_projectile(projectile.Bullet(common.player.x,common.player.y,common.player.angle+spread,"bullet.png",3,1,0,3))
+        common.NewThing(projectile.Bullet(common.player.x,common.player.y,common.player.angle+spread,"bullet.png",3,1,0,3),common.newentities)
 items = {}
 items.update({"gun":Item(basic,"gun","gun.png",basic,common.Ticker(30))})
 items.update({"gun2":Item(gun2,"gun","gun.png",gun2,common.Ticker(40))})
