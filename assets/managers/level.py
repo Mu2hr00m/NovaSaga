@@ -187,8 +187,8 @@ class Level():
         self.hud = pygame.surface.Surface((constants.disp_win.get_width(),constants.disp_win.get_height())) #make a hud, where hp and such will go
         self.hud.set_colorkey((0,0,0,255)) #allow hud to be transparent
         common.boxes.clear()                      #clear out various lists, in case they have stuff left over from the previous level
-        common.particles.clear()
-        common.entities.clear()
+        common.delparticles.extend(common.particles.keys())
+        common.delentities.extend(common.entities.keys())
         try:
             for i in data["boxes"]:
                 common.NewThing(Box(pygame.Rect(i["x"],i["y"],i["w"],i["h"])),common.boxes) #add extra boxes w/o collision
@@ -197,9 +197,9 @@ class Level():
         try:
             for i in data["level_transitions"]:
                 if i["style"]=="old":
-                    common.NewThing(entity.TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"])) #add level transitions
+                    common.NewThing(entity.TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"]),common.newentities) #add level transitions
                 elif i["style"]=="new":
-                    common.NewThing(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])))
+                    common.NewThing(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])),common.newentities)
         except:
             pass
         try:

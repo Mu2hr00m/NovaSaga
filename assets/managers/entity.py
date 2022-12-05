@@ -1,3 +1,4 @@
+from html import entities
 from assets.managers import constants
 from assets.managers import common
 from assets.managers import animation
@@ -316,9 +317,12 @@ class DynamicTransitionObject():
                     print("No valid level could be loaded at "+str(common.global_position[0]-2)+", "+str(common.global_position[1])+", so the default level was loaded")
             else:
                 raise ValueError("Invalid transition id")
-            if len(common.level_transitions)==0:
+            level_transitions = 0
+            for i in common.entities:
+                pass
+            if len(common.entities)==0:
                 raise ValueError("Destination level "+common.loaded_level.name+" has no valid entrance")
-            for i in common.level_transitions:
+            for i in common.entities:
                 if type(i)==DynamicTransitionObject:
                     if i.id==self.dest_id:
                         common.player.x = i.dest[0]
