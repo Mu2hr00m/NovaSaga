@@ -275,10 +275,11 @@ class TransitionObject():
             common.player.x = self.dest[0]
             common.player.y = self.dest[1]
 class DynamicTransitionObject():
-    def __init__(self,rect,id,dest):
+    def __init__(self,rect,id,dest,global_pos):
         self.rect = rect
         self.id = id
         self.dest = dest
+        self.global_pos = global_pos
         if self.id==0:
             self.dest_id = 2
         elif self.id==1:
@@ -317,16 +318,16 @@ class DynamicTransitionObject():
                     print("No valid level could be loaded at "+str(common.global_position[0]-2)+", "+str(common.global_position[1])+", so the default level was loaded")
             else:
                 raise ValueError("Invalid transition id")
-            level_transitions = 0
-            for i in common.entities:
-                pass
-            if len(common.entities)==0:
-                raise ValueError("Destination level "+common.loaded_level.name+" has no valid entrance")
-            for i in common.entities:
+            level_transitions = []
+            for i in common.newentities.values():
                 if type(i)==DynamicTransitionObject:
-                    if i.id==self.dest_id:
-                        common.player.x = i.dest[0]
-                        common.player.y = i.dest[1]
+                    level_transitions.append(i)
+            if len(level_transitions)==0:
+                raise ValueError("Destination level "+common.loaded_level.name+" has no valid entrance")
+            for i in level_transitions:
+                if i.id==self.dest_id:
+                    common.player.x = i.dest[0]
+                    common.player.y = i.dest[1]
 def new_entity(x,y,maxhp,type,xp=0):
     entity = Entity(type,type,xp)
     entity.x = x

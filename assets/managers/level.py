@@ -199,7 +199,7 @@ class Level():
                 if i["style"]=="old":
                     common.NewThing(entity.TransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),(i["dest_x"],i["dest_y"]),i["dest_level"]),common.newentities) #add level transitions
                 elif i["style"]=="new":
-                    common.NewThing(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"])),common.newentities)
+                    common.NewThing(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"]),common.global_position),common.newentities)
         except:
             pass
         try:
