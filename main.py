@@ -62,10 +62,12 @@ def main():
     while isRunning:
         clock.tick(constants.FPS)
         tick+=1
+        common.allticks+=1
         if time.time()>common.realclock+1:
-            common.tick = tick
+            common.fps = tick
             tick = 0
             common.realclock = time.time()
+        common.tick = tick
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 isRunning = False

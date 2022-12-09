@@ -159,7 +159,9 @@ def player_anim(self):
     if keys[pygame.K_p]:
         common.run = level.Run(0,os.urandom(16))
     if keys[pygame.K_g]:
-        common.loaded_level.hud.blit(pygame.transform.scale(common.run.intermediary.map,(common.run.intermediary.map.get_width()*(constants.screen_scale*2-1),common.run.intermediary.map.get_height()*(constants.screen_scale*2-1))),(0,0))
+        common.loaded_level.hud.blit(common.Scale(common.run.intermediary_map,constants.screen_scale*2-1),(0,0))
+        if common.allticks%20<10:
+            pygame.draw.rect(common.loaded_level.hud,(255,255,255),pygame.Rect(common.global_position[0]*(constants.screen_scale*2-1),common.global_position[1]*(constants.screen_scale*2-1),constants.screen_scale*2-1,constants.screen_scale*2-1))
     if keys[pygame.K_h]:
         common.active_text = common.e
         common.active_text.is_open = True

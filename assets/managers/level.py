@@ -152,8 +152,8 @@ class UnloadedLevel():
         self.level_id = level_id
         self.pos = pos
     def load(self):
-        common.loaded_level.load(self.level_id)
         common.global_position = [self.pos[0],self.pos[1]]
+        common.loaded_level.load(self.level_id)
 class Level():
     def __init__(self):
         self.name = "simple"
@@ -247,6 +247,7 @@ class Level():
                         boxrectlist.append(newbox)       #then add the box
         for i in boxrectlist:     #for every rect in the box list, make an actual Box class
             common.NewThing(Box(i),common.boxes)
+        getattr(common.run,common.current_map+"_map").blit(getattr(common.run,common.current_map).map.subsurface(pygame.Rect(common.global_position[0]-1,common.global_position[1]-1,3,3)),(common.global_position[0]-1,common.global_position[1]-1))
     def update_camera(self,pos=None):
         if pos!=None:                #make a hook for placing the camera wherever
             self.camera[0] = pos[0]
@@ -432,13 +433,13 @@ class Map():
                             print("up: "+str(self.map.get_at((i,j-1)))+", right: "+str(self.map.get_at((i+1,j)))+", down: "+str(self.map.get_at((i,j+1)))+", left: "+str(self.map.get_at((i-1,j))))
                             raise ValueError("invalid level map shape at "+str(i)+", "+str(j))
             self.levelarray.update({str((self.doorways[0].pos[0],self.doorways[0].pos[1])):UnloadedLevel("start",self.doorways[0].pos)})
-            common.loaded_level.load("start")
             common.global_position = [self.doorways[0].pos[0],self.doorways[0].pos[1]]
 class Run():
     def __init__(self):
         self.seed = 0
         self.difficulty = 0
         self.intermediary = None
+        self.intermediary_map = None
     def reload(self,difficulty,seed=0x00000000): #this object will be saved
         self.seed = seed
         common.player.x = constants.DEF_START_POS[0]
@@ -448,6 +449,10 @@ class Run():
         common.player.inventory["main_0"] = items.items["gun"]
         common.player.inventory["main_1"] = items.items["gun2"]
         common.player.facing_away = True
+        common.current_map = "intermediary"
         random.seed = self.seed
         self.difficulty = difficulty
         self.intermediary = Map(self.seed)
+        self.intermediary_map = pygame.Surface((self.intermediary.map.get_width(),self.intermediary.map.get_height()))
+        self.intermediary_map.fill(constants.MAP_BACKGROUND_COLOR)
+        common.loaded_level.load("start")

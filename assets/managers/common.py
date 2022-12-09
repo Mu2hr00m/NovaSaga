@@ -205,11 +205,14 @@ def NewThing(thing,dest:dict=newentities):
 Settings = None
 Keybinds = None
 active_text = None
+current_map = ""
 player = None
 e=None
 global_position = (0,0)
 run = None
 tick = 0
+fps = 0
+allticks = 0
 PressedKeys = constants.keyboard_binds.copy()
 PressedKeys.update({"mouse1":False,"mouse2":False,"mouse3":False,"mouse4":False,"mouse5":False})
 KeyCooldown = PressedKeys.copy()

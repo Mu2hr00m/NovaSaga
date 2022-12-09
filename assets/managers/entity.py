@@ -1,4 +1,3 @@
-from html import entities
 from assets.managers import constants
 from assets.managers import common
 from assets.managers import animation
