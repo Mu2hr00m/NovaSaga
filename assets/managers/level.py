@@ -450,7 +450,7 @@ class Run():
         common.player.inventory["main_1"] = items.items["gun2"]
         common.player.facing_away = True
         common.current_map = "intermediary"
-        random.seed = self.seed
+        random.seed(self.seed)
         self.difficulty = difficulty
         self.intermediary = Map(self.seed)
         self.intermediary_map = pygame.Surface((self.intermediary.map.get_width(),self.intermediary.map.get_height()))

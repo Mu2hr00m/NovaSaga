@@ -1,6 +1,6 @@
 import pygame
 import os,random
-random.seed = os.urandom(4)
+random.seed(os.urandom(4))
 pygame.font.init()
 BLOCK_SIZE = 8
 HALF_BLOCK_SIZE = int(BLOCK_SIZE * 0.5)
