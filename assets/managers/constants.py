@@ -29,7 +29,7 @@ BUTTONSIZE = 12*screen_scale
 ITEM_PATH = os.path.join("assets","sprites","items")
 PROJ_PATH = os.path.join("assets","sprites","projectile")
 ui_path = os.path.join("assets","managers","menu_ui")
-disp_win = pygame.display.set_mode((WIDTH*screen_scale,HEIGHT*screen_scale))
+disp_win = pygame.display.set_mode((WIDTH*screen_scale,HEIGHT*screen_scale),depth=32)
 title_subtitles = ["Nova Saga: ","Mirror Worlds","The Unknown","Brain Games","The Game","LLOORREE!!!","Inspired by FTL","Inspired by Terraria","All Inclusive!","Indie Game!","Inspired by 20 Minutes till Dawn","Multiverse Theory","Quantum Mechanics","Uploading to human.exe","Not an Asteroid","Not Mind Controlling You"]
 pygame.display.set_caption(title_subtitles[0]+title_subtitles[random.randint(1,len(title_subtitles)-1)])
 if pygame.display.get_caption()[0]=="Nova Saga: All Inclusive!":
@@ -44,7 +44,8 @@ for i in range(255):
     if pygame.key.name(i)!="":
         keyboard_binds.update({i:False})
 del valid_text
-WIN = pygame.transform.scale(disp_win.copy(),(WIDTH,HEIGHT))
+WIN = pygame.Surface((WIDTH,HEIGHT),depth=32)
+WIN.set_colorkey((0,0,0,255))
 menu_surface = disp_win.copy()
 menu_surface.set_colorkey((0,0,0,0))
 DEF_LEVEL = "test_display.png"

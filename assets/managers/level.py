@@ -1,7 +1,7 @@
 from assets.managers import common
 from assets.managers import constants
 from assets.managers import entity,particle,ai,items
-import os,random,json,pygame
+import os,random,json,pygame,math
 class Box():
     def __init__(self,rect):
         self.rect = rect
@@ -147,20 +147,57 @@ class Box():
                 #draw the polygon (finally)
     def afterdraw(self):
         pygame.draw.rect(constants.WIN,(3,33,3),self.rect)
+class Background():
+    def __init__(self,data:dict,image:pygame.Surface)->None:
+        self.scroll_x = data.get("scroll_x",0)
+        self.scroll_y = data.get("scroll_y",0)
+        self.x = data.get("x",0)
+        self.y = data.get("y",0)
+        self.motion_x = data.get("motion_x",0)
+        self.motion_y = data.get("motion_y",0)
+        self.ticker_x = common.Ticker(image.get_width())
+        self.ticker_y = common.Ticker(image.get_height())
+        self.ticker_x.Trigger()
+        self.ticker_y.Trigger()
+        self.image = image
+        self.rooms = data.get("rooms",[])
+    def get_background(self,rect:pygame.Rect)->pygame.Surface:
+        self.ticker_x.Loop(self.motion_x)
+        self.ticker_y.Loop(self.motion_y)
+        surface = pygame.Surface((rect.w,rect.h))
+        for i in range(-2,math.ceil(rect.w/self.image.get_width())+1):
+            for j in range(-2,math.ceil(rect.h/self.image.get_height())+1):
+                surface.blit(self.image,(i*self.image.get_width()-rect.x+int(common.loaded_level.camera[0]*self.scroll_x%self.image.get_width()+self.ticker_x.tick),j*self.image.get_height()-rect.y+int(common.loaded_level.camera[1]*self.scroll_y%self.image.get_height()+self.ticker_y.tick)))
+        #print(2*self.image.get_width()-rect.x+int(common.player.x*self.scroll_x+self.ticker_x.tick))
+        return surface
 class UnloadedLevel():
     def __init__(self,level_id,pos):
         self.level_id = level_id
+        possible_rooms = []
+        for i in common.backgrounds:
+            for j in i.rooms:
+                if j==level_id:
+                    possible_rooms.append(i)
+        if len(possible_rooms)>1:
+            self.background = possible_rooms[random.randint(0,len(possible_rooms)-1)]
+        elif len(possible_rooms)==0:
+            self.background = Background({"rooms":[self.level_id]},pygame.Surface((100,100)))
+        else:
+            self.background = possible_rooms[0]
         self.pos = pos
     def load(self):
         common.global_position = [self.pos[0],self.pos[1]]
-        common.loaded_level.load(self.level_id)
+        common.loaded_level.load(self.level_id,self.background)
 class Level():
     def __init__(self):
         self.name = "simple"
         self.camera_surface = constants.WIN.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT)
         self.camera = [0,0]
-    def load(self,levelname="test"):
+    def load(self,levelname="test",background=None):
         self.name = levelname
+        if background==None:
+            background = Background({"rooms":[self.name]},pygame.Surface((100,100)))
+        self.background = background
         path = open(os.path.join("assets","levels",levelname,"data.json"))
         if os.path.exists(os.path.join("assets","levels",levelname,"data.json")):
             data = json.load(path)      #load level data.json, next few lines load collision and display from one or both files
@@ -204,10 +241,11 @@ class Level():
             pass
         try:
             for i in data["enemies"]:
-                if i.get("always_spawns",False): #addenemies with the always_spawns tag as true, defaults to false
+                if i.get("always_spawns",False): #add enemies with the always_spawns tag as true, defaults to false
                     entity.new_entity(i["x"],i["y"],i["hp"],i["type"]) #add enemies
         except:
             pass
+        print(common.newentities)
         if data.get("particle_spawners",None)!=None:
             for i in data["particle_spawners"]:
                 common.NewThing(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"],i["variation"]))
@@ -455,4 +493,4 @@ class Run():
         self.intermediary = Map(self.seed)
         self.intermediary_map = pygame.Surface((self.intermediary.map.get_width(),self.intermediary.map.get_height()))
         self.intermediary_map.fill(constants.MAP_BACKGROUND_COLOR)
-        common.loaded_level.load("start")
+        self.intermediary.levelarray[str((self.intermediary.doorways[0].pos[0],self.intermediary.doorways[0].pos[1]))].load()

@@ -207,6 +207,7 @@ Keybinds = None
 active_text = None
 current_map = ""
 player = None
+backgrounds = []
 e=None
 global_position = (0,0)
 run = None

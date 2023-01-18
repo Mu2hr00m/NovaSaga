@@ -1,0 +1,12 @@
+venv
+__pycache__
+*.pyc
+settings*
+*.log
+musicmanager-test.py
+*/__pycache__
+assets/managers/__pycache__
+gitpod
+.VSCodeCounter
+build
+dist

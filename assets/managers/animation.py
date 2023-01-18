@@ -1,5 +1,5 @@
 import pygame
-from assets.managers import constants,common,level
+from assets.managers import constants,common,level,particle
 import random
 import math,os
 def simple(self):
@@ -165,3 +165,29 @@ def player_anim(self):
     if keys[pygame.K_h]:
         common.active_text = common.e
         common.active_text.is_open = True
+def dangling_wire_anim(self):
+    rect = pygame.Rect(0,0,0,0)
+    if self.deviation>0.3+self.pull_strength:
+        self.deviation = self.pull_strength+0.29
+    elif self.deviation<self.pull_strength-0.3:
+        self.deviation = self.pull_strength-0.29
+    else:
+        self.deviation+=(random.random()-0.5)*0.02
+    value = self.deviation
+    if value>0.1:
+        rect.x = self.x-math.sin(value)*self.hp*2
+        rect.y = self.y-self.hp/2-math.cos(value)*self.hp
+        rect.w = self.x-rect.x
+        rect.h = (self.y-rect.y)*2
+        pygame.draw.arc(constants.WIN,(40,40,40),rect,math.radians(-90),0)
+    elif value>=-0.1:
+        pygame.draw.line(constants.WIN,(40,40,40),(self.x,self.y-1),(self.x,self.y+self.hp*1.5))
+    else:
+        rect.x = self.x
+        rect.y = self.y-self.hp/2-math.cos(-value)*self.hp
+        rect.w = math.sin(-value)*self.hp*2
+        rect.h = (self.y-rect.y)*2
+        pygame.draw.arc(constants.WIN,(40,40,40),rect,math.pi,math.radians(-90))
+    if random.random()<0.005:
+        duration = random.randint(180,220)
+        common.NewThing(particle.Dust([rect.x+rect.w/2,rect.y+rect.h],particle.Spark,common.DynamicColor(pygame.Color(255,128,0),pygame.Color(255,255,64),2,100),duration),common.newparticles)

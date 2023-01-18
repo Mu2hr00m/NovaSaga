@@ -19,6 +19,13 @@
             "hp": 5,
             "x": 155,
             "y": 100,
+            "always_spawns": false
+        },
+        {
+            "type": "dangle_wire",
+            "hp": 20,
+            "x": 454,
+            "y": 43,
             "always_spawns": true
         }
     ],

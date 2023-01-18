@@ -77,6 +77,14 @@ class Entity():
             self.max_speed = constants.MAX_SPEED*0.8
             self.animation_ticks.threshold = 10
             self.name = "mite"
+        if AItype=="dangle_wire":
+            self.AIpointer = ai.no_physics
+            self.Animation = animation.dangling_wire_anim
+            self.animation_ticks.threshold = math.pi
+            self.hitbox = pygame.Rect(0,0,0,0)
+            self.pull_strength = 0
+            self.deviation = 0
+            self.name = "None"
         for i in os.listdir(constants.PORTRAIT_PATH):
             item = i.split("-",1)
             if item[0]==self.name:
@@ -88,23 +96,24 @@ class Entity():
         self.overlay = pygame.transform.scale(self.overlay,(self.overlay.get_width()*3,self.overlay.get_height()*3))
         self.overlay.set_alpha(96)
         self.overlay.fill((0,0,0))
-        pygame.draw.circle(self.overlay,(24,24,24),(self.overlay.get_width()/2,self.overlay.get_height()/2),128)
+        pygame.draw.circle(self.overlay,(24,24,24),(self.overlay.get_width()/2,self.overlay.get_height()/2),96)
         pygame.draw.circle(self.overlay,(40,40,40),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
         pygame.draw.circle(self.overlay,(64,64,64),(self.overlay.get_width()/2,self.overlay.get_height()/2),32)
-        self.spritesheet = common.Spritesheet(os.path.join("assets","sprites",texturepath+"_sprites.png"))
-        self.palletized_sprites = []
-        self.pallet = 0
-        for i in self.spritesheet["pallets"]:
-            if i!=self.spritesheet["pallets"][0]:
-                data = {}
-                for j in self.spritesheet.keys():
-                    if type(j)==int:
-                        data2 = {"offset":self.spritesheet[j]["offset"]}
-                        for k in self.spritesheet[j]:
-                            if isinstance(self.spritesheet[j][k],pygame.Surface):
-                                data2.update({k:self.apply_pallet(self.spritesheet[j][k],i,self.spritesheet["pallets"][0])})
-                        data.update({j:data2})
-                self.palletized_sprites.append(data)
+        if self.name!="None":
+            self.spritesheet = common.Spritesheet(os.path.join("assets","sprites",texturepath+"_sprites.png"))
+            self.palletized_sprites = []
+            self.pallet = 0
+            for i in self.spritesheet["pallets"]:
+                if i!=self.spritesheet["pallets"][0]:
+                    data = {}
+                    for j in self.spritesheet.keys():
+                        if type(j)==int:
+                            data2 = {"offset":self.spritesheet[j]["offset"]}
+                            for k in self.spritesheet[j]:
+                                if isinstance(self.spritesheet[j][k],pygame.Surface):
+                                    data2.update({k:self.apply_pallet(self.spritesheet[j][k],i,self.spritesheet["pallets"][0])})
+                            data.update({j:data2})
+                    self.palletized_sprites.append(data)
         #print(self.palletized_sprites[0])
         if self.ai_type=="player":
             self.text_color = constants.CHAR_COLORS["nova"]
@@ -147,6 +156,8 @@ class Entity():
                         collide +=1
         return collide
     def update_physics(self,up=False,left=False,right=False):
+        if self.hitbox.w==0 and self.hitbox.h==0:
+            return None
         self.iframes.Tick()
         if not (right or left):
             if self.grounded:

@@ -2,6 +2,8 @@ import pygame
 from assets.managers import constants,common
 def simple(self):
     self.update_physics()
+def no_physics(self):
+    pass
 def mite(self):
     if self.has_control:
         up=False

@@ -1,0 +1,26 @@
+{
+    "scroll_x": 0.03,
+    "scroll_y": 0.03,
+    "x": 0,
+    "y": 0,
+    "motion_x": 0,
+    "motion_y": 0.02,
+    "rooms": [
+        "start",
+        "end_down",
+        "end_left",
+        "end_up",
+        "end_right",
+        "cross",
+        "straight_x",
+        "straight_y",
+        "t_bottom",
+        "t_left",
+        "t_up",
+        "t_right",
+        "L_bottom_left",
+        "L_bottom_right",
+        "L_top_left",
+        "L_top_right"
+    ]
+}

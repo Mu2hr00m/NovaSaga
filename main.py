@@ -3,7 +3,7 @@ import time
 import pygame
 import os
 import random
-import json
+import json,pathlib
 from assets.managers import common,entity
 from assets.managers import constants
 from assets.managers import ai
@@ -12,6 +12,14 @@ from assets.managers import items
 from assets.managers import projectile,particle
 from assets.managers import level,cutscene
 common.Entity,common.DynamicLevelTransition,common.Dust,common.Level,common.Bullet,common.ParticleArea = entity.Entity,entity.DynamicTransitionObject,particle.Dust,level.Level,projectile.Bullet,particle.ParticleArea
+background_files = os.listdir(os.path.join("assets","backgrounds"))
+for i in background_files:
+    item = pathlib.Path("assets","backgrounds",i)
+    if item.suffix==".png":
+            item2 = pathlib.Path("assets","backgrounds",item.stem+".json")
+            if item2.exists():
+                common.backgrounds.append(level.Background(json.loads(item2.read_text()),pygame.image.load(item.joinpath())))
+del background_files
 def abs(num):
     if num<0:
         num *= -1
@@ -21,12 +29,13 @@ def align_to_grid(pos):
     pos[1] = int(pos[1]/constants.BLOCK_SIZE)*constants.BLOCK_SIZE
     return pos
 def draw():
-    constants.WIN.fill((48,48,48))
+    constants.WIN.fill((0,0,0,0))
     common.loaded_level.hud.fill((0,0,0,255))
     common.loaded_level.update_camera()
+    background = common.loaded_level.background.get_background(pygame.Rect(common.loaded_level.camera[0],common.loaded_level.camera[1],constants.CAM_WIDTH,constants.CAM_HEIGHT))
+    constants.WIN.blit(background,(common.loaded_level.camera[0],common.loaded_level.camera[1]))
     for box in common.boxes.items():
-        box=box[1]
-        box.Draw()
+        box[1].Draw()
     constants.WIN.blit(common.loaded_level.display_texture,(0,0))
     if common.player.overlay_active:
         constants.WIN.blit(common.player.overlay,(common.player.x-(constants.CAM_WIDTH*1.5)-1,common.player.y-(constants.CAM_HEIGHT*1.5)))
