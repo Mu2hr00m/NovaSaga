@@ -4,7 +4,7 @@ import pygame
 import os
 import random
 import json,pathlib
-from assets.managers import common,entity
+from assets.managers import common,entity,sound
 from assets.managers import constants
 from assets.managers import ai
 from assets.managers import menus
@@ -12,6 +12,7 @@ from assets.managers import items
 from assets.managers import projectile,particle
 from assets.managers import level,cutscene
 common.Entity,common.DynamicLevelTransition,common.Dust,common.Level,common.Bullet,common.ParticleArea = entity.Entity,entity.DynamicTransitionObject,particle.Dust,level.Level,projectile.Bullet,particle.ParticleArea
+pygame.mixer.init()
 background_files = os.listdir(os.path.join("assets","backgrounds"))
 for i in background_files:
     item = pathlib.Path("assets","backgrounds",i)
@@ -81,6 +82,8 @@ def main():
             if event.type == pygame.QUIT:
                 isRunning = False
                 break
+            elif event.type == constants.MUSIC_END_EVENT:
+                common.loaded_level.play_music()
         keys = pygame.key.get_pressed()
         for i in common.PressedKeys.keys():
             if type(i)==int:

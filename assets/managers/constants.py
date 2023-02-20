@@ -73,3 +73,4 @@ CHAR_COLORS = {"default":(128,128,128),"nova":(192,128,255)}
 CHAR_COLORS.setdefault("default",(128,128,128))
 TEXTBOX_BACKGROUND = (32,32,32)
 TEXTBOX_BORDER = (96,96,96)
+MUSIC_END_EVENT = pygame.event.custom_type()

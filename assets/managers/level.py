@@ -184,16 +184,31 @@ class UnloadedLevel():
             self.background = Background({"rooms":[self.level_id]},pygame.Surface((100,100)))
         else:
             self.background = possible_rooms[0]
+        possible_rooms = []
+        for i in common.MusicLibrary.values():
+            for j in i.levels:
+                if j==self.level_id:
+                    possible_rooms.append(i)
+        if len(possible_rooms)==0:
+            possible_rooms.append(common.MusicLibrary["test"])
+        self.music = possible_rooms
         self.pos = pos
     def load(self):
         common.global_position = [self.pos[0],self.pos[1]]
-        common.loaded_level.load(self.level_id,self.background)
+        common.loaded_level.load(self.music,self.level_id,self.background)
 class Level():
     def __init__(self):
         self.name = "simple"
         self.camera_surface = constants.WIN.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT)
         self.camera = [0,0]
-    def load(self,levelname="test",background=None):
+    def play_music(self):
+        if len(self.music)>1:
+            self.music[random.randint(0,len(self.music)-1)].play_music()
+        else:
+            self.music[0].play_music()
+    def load(self,music,levelname="test",background=None):
+        self.music = music
+        self.play_music()
         self.name = levelname
         if background==None:
             background = Background({"rooms":[self.name]},pygame.Surface((100,100)))
