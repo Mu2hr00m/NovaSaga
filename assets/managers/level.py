@@ -1,11 +1,12 @@
 from assets.managers import common
 from assets.managers import constants
 from assets.managers import entity,particle,ai,items
-import os,random,json,pygame,math
+import os,random,json,pygame,math,pygame.gfxdraw
 class Box():
     def __init__(self,rect):
         self.rect = rect
         self.hidden = False
+        self.points = []
     def Draw(self,forcedraw=False):
         if not self.hidden or forcedraw: #check wheter or not the box is hidden, or if its being forced to draw
             neg_player_y = int(-common.player.y+4)  #unflip player y and the rect y positions
@@ -141,12 +142,38 @@ class Box():
                     else:
                         points.append((x_value_2,y_value1))
                 points.append(point4)
-                pygame.draw.polygon(constants.WIN,(0,0,0),points)
-                #pygame.draw.line(constants.WIN,(0,0,0),point1,point4,1)
-                #pygame.draw.line(constants.WIN,(0,0,0),point2,point3,1)
+                self.points = points
+                pygame.draw.polygon(constants.layer_4,(0,1,0),points)
                 #draw the polygon (finally)
-    def afterdraw(self):
-        pygame.draw.rect(constants.WIN,(3,33,3),self.rect)
+    def afterdraw(self,forcedraw=False):
+        pass
+        #if (not self.hidden or forcedraw) and len(self.points)>=3:
+        #    pygame.gfxdraw.filled_polygon(constants.layer_4_a,self.points,(0,128,0,128))
+class Edge():
+    def __init__(self,pos1,pos2,facing):
+        self.pos1 = pos1
+        self.pos2 = pos2
+        self.facing = facing
+    def Draw(self,forcedraw=False):
+        player_x = common.player.x
+        player_y = common.player.y*-1+constants.layer_1.get_size()[1]
+        camera_height = common.loaded_level.camera_surface.get_height() #get camera values, used to keep the drawn polygons onscreen
+        camera_width = common.loaded_level.camera_surface.get_width()
+        camera_x = common.loaded_level.camera_surface.get_offset()[0]
+        camera_y = common.loaded_level.camera_surface.get_offset()[1]
+        if (not forcedraw) and (constants.layer_1.get_bounding_rect().collidepoint(self.pos1[0],self.pos1[1]) or constants.layer_1.get_bounding_rect().collidepoint(self.pos2[0],self.pos2[1])):
+            points = [self.pos1,self.pos2]
+            if self.facing==0 and common.player.y>=self.pos1[0]:
+                if not player_x==self.pos1[0] and not player_x==self.pos2[0]:
+                    if player_x<=self.pos1[0]:
+                        x_1 = camera_x+camera_width
+                        x_2 = camera_x+camera_width
+                    slope1 = (self.pos1[1]-player_y)/(self.pos1[0]-player_x)
+                    slope2 = (self.pos2[1]-player_y)/(self.pos2[0]-player_x)
+                    y_1 = -(player_y-((player_x-x_1)*slope1)) #compute the y values, using adjusted point-slope form
+                    y_2 = -(player_y-((player_x-x_2)*slope2))
+                    points.append((x_2,y_2),(x_1,y_1))
+                    pygame.draw.polygon(constants.layer_4,(0,1,0),points)
 class Background():
     def __init__(self,data:dict,image:pygame.Surface)->None:
         self.scroll_x = data.get("scroll_x",0)
@@ -199,7 +226,7 @@ class UnloadedLevel():
 class Level():
     def __init__(self):
         self.name = "simple"
-        self.camera_surface = constants.WIN.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT)
+        self.camera_surface = constants.layer_4.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT)
         self.camera = [0,0]
     def play_music(self):
         if len(self.music)>1:
@@ -208,7 +235,7 @@ class Level():
             self.music[0].play_music()
     def load(self,music,levelname="test",background=None):
         self.music = music
-        self.play_music()
+        #self.play_music()
         self.name = levelname
         if background==None:
             background = Background({"rooms":[self.name]},pygame.Surface((100,100)))
@@ -234,10 +261,12 @@ class Level():
             self.collision_texture = pygame.transform.scale(self.collision_texture,(self.collision_texture.get_width()*data["level_scale"],self.collision_texture.get_height()*data["level_scale"]))
         self.collision = pygame.mask.from_surface(self.collision_texture) #make collision
         self.camera = [0,0]                                               #make camera
-        constants.WIN = pygame.transform.scale(constants.WIN,(self.display_texture.get_size())) #make the main level surface from the display texture
-        self.camera_surface = constants.WIN.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT) #make the camera, which is a subsurface of the level surface
-        self.hud = pygame.surface.Surface((constants.disp_win.get_width(),constants.disp_win.get_height())) #make a hud, where hp and such will go
-        self.hud.set_colorkey((0,0,0,255)) #allow hud to be transparent
+        constants.layer_1 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
+        constants.layer_2 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
+        constants.layer_3 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
+        constants.layer_4 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
+        constants.layer_4_a = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size())) #make the main level surface from the display texture
+        self.camera_surface = constants.layer_4.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT) #make the camera, which is a subsurface of the level surface
         common.boxes.clear()                      #clear out various lists, in case they have stuff left over from the previous level
         common.delparticles.extend(common.particles.keys())
         common.delentities.extend(common.entities.keys())
@@ -266,6 +295,101 @@ class Level():
                 common.NewThing(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"],i["variation"]))
         k=0
         m=0
+        '''edgelist = []
+        self.collision.invert()
+        collision_objects = self.collision.connected_components()
+        for object in collision_objects:
+            x=0
+            y=0
+            finding_point = True
+            while finding_point:
+                x+=1
+                if common.out_of_bounds((x,y)):
+                    x=0
+                    y+=1
+                if object.get_at((x,y))>=1:
+                    finding_point = False
+            print((x,y))
+            start = [x,y]
+            point = (x,y)
+            pos = [x+1,y]
+            prev_pos = [x,y]
+            direction = 1
+            while pos!=start:
+                prev_pos = [pos[0],pos[1]]
+                print(pos)
+                if not common.out_of_bounds((x,y-1)):
+                    up = object.get_at((x,y-1))
+                else:
+                    up = 0
+                if not common.out_of_bounds((x,y+1)):
+                    down = object.get_at((x,y+1))
+                else:
+                    down = 0
+                if not common.out_of_bounds((x+1,y)):
+                    right = object.get_at((x+1,y))
+                else:
+                    right = 0
+                if not common.out_of_bounds((x-1,y)):
+                    left = object.get_at((x-1,y))
+                else:
+                    left = 0
+                if up==0 and right==1 and down==1 and left==1:
+                    pos[0]+=1
+                elif up==1 and right==1 and down==0 and left==1:
+                    pos[0]-=1
+                elif up==1 and right==0 and down==1 and left==1:
+                    pos[1]+=1
+                elif up==1 and right==1 and down==1 and left==0:
+                    pos[1]-=1
+                elif up==0 and right==0 and down==1 and left==1:
+                    edgelist.append(Edge(point,pos,2))
+                    print("2")
+                    point = (pos[0],pos[1])
+                    pos[1]+=1
+                    direction = 2
+                elif up==1 and right==0 and down==0 and left==1:
+                    edgelist.append(Edge(point,pos,3))
+                    print("3")
+                    point = (pos[0],pos[1])
+                    pos[0]-=1
+                    direction = 3
+                elif up==1 and right==1 and down==0 and left==0:
+                    edgelist.append(Edge(point,pos,0))
+                    print("0")
+                    point = (pos[0],pos[1])
+                    pos[1]-=1
+                    direction = 0
+                elif up==0 and right==1 and down==1 and left==0:
+                    edgelist.append(Edge(point,pos,1))
+                    print("1")
+                    point = (pos[0],pos[1])
+                    pos[0]+=1
+                    direction = 1
+                elif up==1 and right==1 and down==1 and left==1:
+                    if direction<3:
+                        edgelist.append(Edge(point,pos,direction+1))
+                        print(direction+1)
+                    else:
+                        edgelist.append(Edge(point,pos,0))
+                        print("0")
+                    point = (pos[0],pos[1])
+                    if direction==0:
+                        direction=3
+                        pos[0]-=1
+                    elif direction==1:
+                        direction=0
+                        pos[1]-=1
+                    elif direction==2:
+                        direction=1
+                        pos[0]+=1
+                    else:
+                        direction=2
+                        pos[1]+=1
+                if (pos==prev_pos) or common.out_of_bounds(pos):
+                    raise RuntimeError("Edge finder hung at "+str(pos))
+
+        self.collision.invert()'''
         boxrectlist = []                                                     #all this is the algorithm for making the boxes
         for i in range(0,self.collision_texture.get_width()-1):              #for each x
             for j in range(0,self.collision_texture.get_height()-1):         #for each y
@@ -274,7 +398,7 @@ class Level():
                     newbox= pygame.Rect(i,j,1,1)  #make a box
                     k=0
                     while True:
-                        if newbox.x+k<constants.WIN.get_width()-1:         #go as far right as possible
+                        if newbox.x+k<constants.layer_1.get_width()-1:         #go as far right as possible
                             if self.collision.get_at((newbox.x+k,j))==0:
                                 break
                         else:
@@ -283,11 +407,11 @@ class Level():
                             break
                         k+=1
                     newbox.w=k #set the width
-                    newbox.h=constants.WIN.get_height()-newbox.y-1
+                    newbox.h=constants.layer_1.get_height()-newbox.y-1
                     for l in range(newbox.x,newbox.x+newbox.w):         #go as far down as possible, keeping the shortest column for the height
                         m=0
                         while True:
-                            if not (l>constants.WIN.get_width()-1 or newbox.y+m>constants.WIN.get_height()-1):
+                            if not (l>constants.layer_1.get_width()-1 or newbox.y+m>constants.layer_1.get_height()-1):
                                 if self.collision.get_at((l,newbox.y+m))==0:
                                     break
                             else:
@@ -298,6 +422,9 @@ class Level():
                         newbox.h=m
                     if not (newbox.w==0 or newbox.h==0): #check that the rect isnt invalid
                         boxrectlist.append(newbox)       #then add the box
+        #print(len(edgelist))
+        #for i in edgelist:
+        #    common.NewThing(i,common.boxes)
         for i in boxrectlist:     #for every rect in the box list, make an actual Box class
             common.NewThing(Box(i),common.boxes)
         getattr(common.run,common.current_map+"_map").blit(getattr(common.run,common.current_map).map.subsurface(pygame.Rect(common.global_position[0]-1,common.global_position[1]-1,3,3)),(common.global_position[0]-1,common.global_position[1]-1))
@@ -309,13 +436,14 @@ class Level():
             self.camera = [int(common.player.x-(constants.CAM_WIDTH/2)),int(common.player.y-(constants.CAM_HEIGHT/2))] #set the camera to put the player in the middle
         if self.camera[0]<=0:          #constrain the camera to within the level borders, else game crash
             self.camera[0] = 0
-        if self.camera[0]+constants.CAM_WIDTH>=constants.WIN.get_width():
-            self.camera[0] = constants.WIN.get_width()-constants.CAM_WIDTH
+        if self.camera[0]+constants.CAM_WIDTH>=constants.layer_1.get_width():
+            self.camera[0] = constants.layer_1.get_width()-constants.CAM_WIDTH
         if self.camera[1]<=0:
             self.camera[1] = 0
-        if self.camera[1]+constants.CAM_HEIGHT>=constants.WIN.get_height():
-            self.camera[1] = constants.WIN.get_height()-constants.CAM_HEIGHT
-        self.camera_surface = constants.WIN.subsurface(self.camera[0],self.camera[1],constants.CAM_WIDTH,constants.CAM_HEIGHT) #update the camera subsurface
+        if self.camera[1]+constants.CAM_HEIGHT>=constants.layer_1.get_height():
+            self.camera[1] = constants.layer_1.get_height()-constants.CAM_HEIGHT
+        self.camera_surface = constants.layer_4.subsurface(self.camera[0],self.camera[1],constants.CAM_WIDTH,constants.CAM_HEIGHT) #update the camera subsurface
+        self.camera_surface.get_view()
 class Node():
     def __init__(self,pos,type,maxconnections,owner): #not really used, might be used later
         self.pos = pos

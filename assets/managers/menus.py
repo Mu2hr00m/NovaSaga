@@ -8,8 +8,8 @@ title_ui = []
 pause_ui = []
 seed_ui = []
 menu_ticks = common.Ticker(20)
-width_eighth = constants.menu_surface.get_width()/8
-height_eighth = constants.menu_surface.get_height()/8
+width_eighth = constants.layer_5.get_width()/8
+height_eighth = constants.layer_5.get_height()/8
 #title_ui.append(pygame.image.load(os.path.join("assets","managers","menu_ui","title_background.png")))
 class Button():
     def __init__(self,rect,path,index=0):
@@ -32,16 +32,16 @@ class Button():
         pygame.draw.rect(self.down_surface,(64,64,64),pygame.Rect(border_size,border_size,self.rect.w-border_size*2,self.rect.h-border_size*2))
         self.surface.blit(self.text,(self.rect.w/2-self.text.get_width()/2,border_size*2))
         self.down_surface.blit(self.down_text,(self.rect.w/2-self.down_text.get_width()/2,border_size*2))
-        self.rect.x = (constants.menu_surface.get_width()/2)-(self.rect.w/2)
-        self.rect.y = constants.menu_surface.get_height()/8*(index*0.75+2)
+        self.rect.x = (constants.layer_5.get_width()/2)-(self.rect.w/2)
+        self.rect.y = constants.layer_5.get_height()/8*(index*0.75+2)
     def Draw(self):
         if pygame.mouse.get_focused():
             if self.rect.collidepoint(pygame.mouse.get_pos()):
-                constants.menu_surface.blit(self.down_surface,(self.rect.x,self.rect.y))
+                constants.layer_5.blit(self.down_surface,(self.rect.x,self.rect.y))
             else:
-                constants.menu_surface.blit(self.surface,(self.rect.x,self.rect.y))
+                constants.layer_5.blit(self.surface,(self.rect.x,self.rect.y))
         else:
-            constants.menu_surface.blit(self.surface,(self.rect.x,self.rect.y))
+            constants.layer_5.blit(self.surface,(self.rect.x,self.rect.y))
 
 def ui_background(w,h,transparent=True):
     corner = 5*constants.screen_scale
@@ -129,9 +129,9 @@ for i in range(3):
     inventory_ui[3].update({i:button})
 def title():
     global menu_ticks
-    constants.menu_surface.fill((0,1,0,0))
-    constants.menu_surface.blit(title_ui[0],(width_eighth*2.5,height_eighth*2))
-    constants.menu_surface.blit(title_ui[1],(width_eighth*4-title_ui[1].get_width()/2,height_eighth*0.75))
+    constants.layer_5.fill((0,1,0,0))
+    constants.layer_5.blit(title_ui[0],(width_eighth*2.5,height_eighth*2))
+    constants.layer_5.blit(title_ui[1],(width_eighth*4-title_ui[1].get_width()/2,height_eighth*0.75))
     for element in title_ui:
         if type(element)==Button:
             element.Draw()
@@ -152,9 +152,9 @@ def title():
             menu_ticks.Trigger()
 def pause():
     global menu_ticks
-    constants.menu_surface.fill((0,0,0,255))
-    constants.menu_surface.blit(pause_ui[0],(width_eighth*2.5,height_eighth*1.5))
-    constants.menu_surface.blit(pause_ui[1],(width_eighth*4-pause_ui[1].get_width()/2,height_eighth*0.5))
+    constants.layer_5.fill((0,0,0,255))
+    constants.layer_5.blit(pause_ui[0],(width_eighth*2.5,height_eighth*1.5))
+    constants.layer_5.blit(pause_ui[1],(width_eighth*4-pause_ui[1].get_width()/2,height_eighth*0.5))
     for element in pause_ui:
         if type(element)==Button:
             element.Draw()
@@ -186,9 +186,9 @@ def pause():
             menu_ticks.Trigger()
 def seed():
     global menu_ticks
-    constants.menu_surface.fill((0,1,0))
-    constants.menu_surface.blit(seed_ui[16],(width_eighth,height_eighth/2))
-    constants.menu_surface.blit(seed_ui[17],(width_eighth*1.25,height_eighth*0.875))
+    constants.layer_5.fill((0,1,0))
+    constants.layer_5.blit(seed_ui[16],(width_eighth,height_eighth/2))
+    constants.layer_5.blit(seed_ui[17],(width_eighth*1.25,height_eighth*0.875))
     for i in range(16):
         if (seed_ui[i].rect.collidepoint(pygame.mouse.get_pos()) and common.KeyDirect("mouse1")) or common.KeyDirect(eval("pygame.K_"+seed_ui[i].path[5])):
             if len(seed_ui[18])<=16:
@@ -210,15 +210,15 @@ def seed():
         if len(e)<16:
             seed_ui[18]+="0"*(16-len(e))
         common.run.reload(0,int(e,16))
-    common.Font((0,1,0),pygame.Rect(width_eighth*3.25,height_eighth,width_eighth*4.75,height_eighth*2),seed_ui[18]+[None],2,constants.menu_surface)
+    common.Font((0,1,0),pygame.Rect(width_eighth*3.25,height_eighth,width_eighth*4.75,height_eighth*2),seed_ui[18]+[None],2,constants.layer_5)
 def inventory():
-    constants.menu_surface.fill((0,0,0))
-    constants.menu_surface.blit(inventory_ui[1],(width_eighth*4-(inventory_ui[1].get_width()/2),height_eighth*0.25))
-    constants.menu_surface.blit(inventory_ui[0],(width_eighth,height_eighth))
-    pygame.draw.rect(constants.menu_surface,(0,1,0),pygame.Rect(inventory_ui[2][0].rect.x-constants.screen_scale,inventory_ui[2][0].rect.y-constants.screen_scale,34*constants.INV_WIDTH*constants.screen_scale,34*constants.INV_HEIGHT*constants.screen_scale))
-    pygame.draw.rect(constants.menu_surface,(0,1,0),pygame.Rect(inventory_ui[3][0].rect.x-constants.screen_scale,inventory_ui[3][0].rect.y-constants.screen_scale,102*constants.screen_scale,34*constants.screen_scale))
-    common.Font((0,1,0),pygame.Rect(72*constants.screen_scale,30*constants.screen_scale,150*constants.screen_scale,100*constants.screen_scale),"actions ",2,constants.menu_surface)
-    common.Font((0,1,0),pygame.Rect(106*constants.screen_scale,81*constants.screen_scale,150*constants.screen_scale,100*constants.screen_scale),"storage ",2,constants.menu_surface)
+    constants.layer_5.fill((0,0,0))
+    constants.layer_5.blit(inventory_ui[1],(width_eighth*4-(inventory_ui[1].get_width()/2),height_eighth*0.25))
+    constants.layer_5.blit(inventory_ui[0],(width_eighth,height_eighth))
+    pygame.draw.rect(constants.layer_5,(0,1,0),pygame.Rect(inventory_ui[2][0].rect.x-constants.screen_scale,inventory_ui[2][0].rect.y-constants.screen_scale,34*constants.INV_WIDTH*constants.screen_scale,34*constants.INV_HEIGHT*constants.screen_scale))
+    pygame.draw.rect(constants.layer_5,(0,1,0),pygame.Rect(inventory_ui[3][0].rect.x-constants.screen_scale,inventory_ui[3][0].rect.y-constants.screen_scale,102*constants.screen_scale,34*constants.screen_scale))
+    common.Font((0,1,0),pygame.Rect(72*constants.screen_scale,30*constants.screen_scale,150*constants.screen_scale,100*constants.screen_scale),"actions ",2,constants.layer_5)
+    common.Font((0,1,0),pygame.Rect(106*constants.screen_scale,81*constants.screen_scale,150*constants.screen_scale,100*constants.screen_scale),"storage ",2,constants.layer_5)
     for i in inventory_ui[2]:
         inventory_ui[2][i].Draw()
         if inventory_ui[2][i].rect.collidepoint(pygame.mouse.get_pos()) and common.PressedKeys["mouse1"]:
@@ -230,10 +230,10 @@ def inventory():
     for i in common.player.inventory.keys():
         if type(common.player.inventory[i])==items.Item and i!="cursor":
             if i.startswith("inv_"):
-                constants.menu_surface.blit(common.player.inventory[i].inv_texture,inventory_ui[2][int(i[4])])
+                constants.layer_5.blit(common.player.inventory[i].inv_texture,inventory_ui[2][int(i[4])])
             else:
-                constants.menu_surface.blit(common.player.inventory[i].inv_texture,inventory_ui[3][int(i[5])])
+                constants.layer_5.blit(common.player.inventory[i].inv_texture,inventory_ui[3][int(i[5])])
     if type(common.player.inventory["cursor"])==items.Item:
-        constants.menu_surface.blit(common.player.inventory["cursor"].inv_texture,pygame.mouse.get_pos())
+        constants.layer_5.blit(common.player.inventory["cursor"].inv_texture,pygame.mouse.get_pos())
     if common.PressedKeys[pygame.K_ESCAPE]:
         common.menu = None

@@ -92,13 +92,14 @@ class Entity():
         #print(self.portraits)
         self.overlay_active = False
         self.xp = xp
-        self.overlay = common.loaded_level.camera_surface.copy()
-        self.overlay = pygame.transform.scale(self.overlay,(self.overlay.get_width()*3,self.overlay.get_height()*3))
-        self.overlay.set_alpha(96)
-        self.overlay.fill((0,0,0))
-        pygame.draw.circle(self.overlay,(24,24,24),(self.overlay.get_width()/2,self.overlay.get_height()/2),96)
-        pygame.draw.circle(self.overlay,(40,40,40),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
-        pygame.draw.circle(self.overlay,(64,64,64),(self.overlay.get_width()/2,self.overlay.get_height()/2),32)
+        self.overlay = pygame.Surface((constants.CAM_WIDTH*2,constants.CAM_HEIGHT*2),pygame.SRCALPHA)
+        self.overlay.fill((0,0,0,236))
+        pygame.draw.circle(self.overlay,(3,3,3,212),(self.overlay.get_width()/2,self.overlay.get_height()/2),128)
+        pygame.draw.circle(self.overlay,(6,6,6,192),(self.overlay.get_width()/2,self.overlay.get_height()/2),96)
+        pygame.draw.circle(self.overlay,(12,12,12,128),(self.overlay.get_width()/2,self.overlay.get_height()/2),64)
+        pygame.draw.circle(self.overlay,(18,18,18,48),(self.overlay.get_width()/2,self.overlay.get_height()/2),40)
+        pygame.draw.circle(self.overlay,(1,1,1,0),(self.overlay.get_width()/2,self.overlay.get_height()/2),16)
+        self.overlay = common.Scale(self.overlay)
         if self.name!="None":
             self.spritesheet = common.Spritesheet(os.path.join("assets","sprites",texturepath+"_sprites.png"))
             self.palletized_sprites = []

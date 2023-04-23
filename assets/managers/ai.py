@@ -55,8 +55,9 @@ def playerAI(self):
             if pygame.mouse.get_pressed(5)[0] and keys[pygame.K_LSHIFT]:
                 pos = pygame.mouse.get_pos()
                 pos = [pos[0],pos[1]]
+                color = constants.disp_win.get_at(pos)
                 pos[0] = int((pos[0]/constants.disp_win.get_width()*constants.CAM_WIDTH)+common.loaded_level.camera[0])
                 pos[1] = int((pos[1]/constants.disp_win.get_height()*constants.CAM_HEIGHT)+common.loaded_level.camera[1])
-                print(pos)
+                print(pos,color)
     else:
         self.update_physics(False,False,False)

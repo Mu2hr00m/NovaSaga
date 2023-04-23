@@ -114,9 +114,9 @@ def ReloadSettings():
         pygame.quit()
 def out_of_bounds(pos,safety = 0):
     oob = False
-    if pos[0]<safety or pos[0]>constants.WIN.get_width()-1-safety:
+    if pos[0]<safety or pos[0]>constants.layer_1.get_width()-1-safety:
         oob = True
-    if pos[1]<safety or pos[1]>constants.WIN.get_height()-1-safety:
+    if pos[1]<safety or pos[1]>constants.layer_1.get_height()-1-safety:
         oob = True
     return oob
 def Font(color,rect=pygame.Rect,text=str,size=1,dest_surface=loaded_level.hud):

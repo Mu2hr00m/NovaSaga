@@ -38,9 +38,9 @@ class Dust():
         if not self.duration.active:
             self.kill()
         if type(self.color)==common.DynamicColor:
-            constants.WIN.set_at((int(self.pos[0]),int(self.pos[1])),self.color.call())
+            constants.layer_3.set_at((int(self.pos[0]),int(self.pos[1])),self.color.call())
         else:
-            constants.WIN.set_at((int(self.pos[0]),int(self.pos[1])),self.color)
+            constants.layer_3.set_at((int(self.pos[0]),int(self.pos[1])),self.color)
 def FallingDust(self):
     value = random.randint(0,9)
     if value<=2:

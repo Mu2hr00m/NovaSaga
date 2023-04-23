@@ -62,4 +62,4 @@ class Bullet():
                     if self.pierce<0:
                         self.kill()
     def Draw(self):
-        constants.WIN.blit(self.texture,(self.x-1,self.y-1))
+        constants.layer_2.blit(self.texture,(self.x-1,self.y-1))

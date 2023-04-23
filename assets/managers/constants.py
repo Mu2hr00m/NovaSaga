@@ -44,10 +44,20 @@ for i in range(255):
     if pygame.key.name(i)!="":
         keyboard_binds.update({i:False})
 del valid_text
-WIN = pygame.Surface((WIDTH,HEIGHT),depth=32)
-WIN.set_colorkey((0,0,0,255))
-menu_surface = disp_win.copy()
-menu_surface.set_colorkey((0,0,0,0))
+layer_0 = pygame.Surface((WIDTH,HEIGHT),depth=32) #background
+layer_1 = pygame.Surface((WIDTH,HEIGHT),depth=32) #level background
+layer_2 = pygame.Surface((WIDTH,HEIGHT),depth=32) #entities
+layer_3 = pygame.Surface((WIDTH,HEIGHT),depth=32) #level foreground
+layer_4 = pygame.Surface((WIDTH,HEIGHT),depth=32) #dynamic shadows
+layer_4_a = pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA,depth=32) #dynamic shadows afterdraw
+layer_5 = pygame.Surface((WIDTH*screen_scale,HEIGHT*screen_scale),pygame.SRCALPHA,depth=32) #hud
+layer_1.set_colorkey((0,0,0,255))
+layer_2.set_colorkey((0,0,0,255))
+layer_3.set_colorkey((0,0,0,255))
+layer_4.set_colorkey((0,0,0,255))
+#layer_4_a.set_colorkey((0,0,0,255))
+#menu_surface = disp_win.copy()
+#menu_surface.set_colorkey((0,0,0,0))
 DEF_LEVEL = "test_display.png"
 DEF_START_POS = (10 * BLOCK_SIZE, int(19.5 * BLOCK_SIZE))
 PLAYER_VEL = 2

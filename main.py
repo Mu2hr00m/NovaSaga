@@ -30,32 +30,50 @@ def align_to_grid(pos):
     pos[1] = int(pos[1]/constants.BLOCK_SIZE)*constants.BLOCK_SIZE
     return pos
 def draw():
-    constants.WIN.fill((0,0,0,0))
-    common.loaded_level.hud.fill((0,0,0,255))
+    constants.layer_0.fill((0,0,0,0))
+    constants.layer_1.fill((0,0,0,0))
+    constants.layer_2.fill((0,0,0,0))
+    constants.layer_3.fill((0,0,0,0))
+    constants.layer_4.fill((0,0,0,0))
+    #constants.layer_4_a.convert(32,pygame.SRCALPHA)
+    #constants.layer_4_a.fill((0,0,0,0))
+    constants.layer_5.fill((0,0,0,0))
     common.loaded_level.update_camera()
     background = common.loaded_level.background.get_background(pygame.Rect(common.loaded_level.camera[0],common.loaded_level.camera[1],constants.CAM_WIDTH,constants.CAM_HEIGHT))
-    constants.WIN.blit(background,(common.loaded_level.camera[0],common.loaded_level.camera[1]))
+    constants.layer_0.blit(background,(0,0))
     for box in common.boxes.items():
         box[1].Draw()
-    constants.WIN.blit(common.loaded_level.display_texture,(0,0))
+        #box[1].afterdraw()
+    constants.layer_1.blit(common.loaded_level.display_texture,(0,0))
     if common.player.overlay_active:
-        constants.WIN.blit(common.player.overlay,(common.player.x-(constants.CAM_WIDTH*1.5)-1,common.player.y-(constants.CAM_HEIGHT*1.5)))
+        constants.layer_5.blit(common.player.overlay,((common.player.x-common.loaded_level.camera[0]-128-(constants.CAM_WIDTH/2))*constants.screen_scale,(common.player.y-common.loaded_level.camera[1]-96-(constants.CAM_HEIGHT/2))*constants.screen_scale))
     for i in common.entities.items():
         i = i[1]
         if callable(getattr(i,"Draw",None)):
             i.Draw()
         elif type(i)==entity.DynamicTransitionObject:
-            pygame.draw.rect(constants.WIN,(128,128,128),i.rect)
+            pygame.draw.rect(constants.layer_2,(128,128,128),i.rect)
     for i in common.particles.items():
         i = i[1]
         i.Draw()
     common.player.Draw()
     if common.active_text!=None:
         common.active_text.update()
-    pygame.transform.scale(common.loaded_level.camera_surface,(constants.WIDTH*constants.screen_scale,constants.HEIGHT*constants.screen_scale),constants.disp_win)
+    constants.layer_4.blit(constants.layer_1,(0,0))
+    constants.layer_4.blit(constants.layer_2,(0,0))
+    constants.layer_4.blit(constants.layer_3,(0,0))
+    e = pygame.PixelArray(constants.layer_4_a)
+    e.replace((0,64,0),(0,0,0))
+    e.close()
+    f = pygame.mask.from_surface(constants.layer_4_a)
+    f.to_surface(constants.layer_4_a,setcolor=(0,1,0),unsetcolor=None)
+    #constants.layer_4_a.convert(32,0)
+    #constants.layer_4.blit(constants.layer_4_a,(0,0))
+    constants.layer_0.blit(common.loaded_level.camera_surface,(0,0))
+    pygame.transform.scale(constants.layer_0,(constants.WIDTH*constants.screen_scale,constants.HEIGHT*constants.screen_scale),constants.disp_win)
+    constants.disp_win.blit(constants.layer_5,(0,0))
     #common.loaded_level.hud.blit(constants.DEF_FONT.render("FPS: "+str(common.tick),False,(128,64,192)),(constants.screen_scale,13*constants.screen_scale))
     common.Font("nova",pygame.Rect((constants.screen_scale,13*constants.screen_scale,8,30)),"fps: "+str(common.tick)+" ")
-    constants.disp_win.blit(common.loaded_level.hud,(0,0))
     pygame.display.update()
 def main():
     clock = pygame.time.Clock()
@@ -155,7 +173,7 @@ def main():
                 menus.seed()
             elif common.menu=="inventory":
                 menus.inventory()
-            constants.disp_win.blit(constants.menu_surface,(0,0))
+            constants.disp_win.blit(constants.layer_5,(0,0))
             pygame.display.update()
     json.dump(common.Settings,open("settings","w"),indent=4)
     print("game quit no errors")

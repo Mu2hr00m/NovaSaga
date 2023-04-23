@@ -3,7 +3,7 @@ from assets.managers import constants,common,level,particle
 import random
 import math,os
 def simple(self):
-    pygame.draw.rect(constants.WIN,(0,128,128),self.hitbox)
+    pygame.draw.rect(constants.layer_2,(0,128,128),self.hitbox)
 def mite_anim(self):
     x_vel = self.x_vel
     y_vel = self.y_vel
@@ -49,16 +49,16 @@ def mite_anim(self):
             if image.get_at((i,j))==(0,255,0):
                 image.set_at((i,j),mask.get_at((i,j)))
     offset = self.spritesheet[animation_type]["offset"]
-    constants.WIN.blit(image,(self.hitbox.x+offset[0],self.hitbox.y+offset[1]))
+    constants.layer_2.blit(image,(self.hitbox.x+offset[0],self.hitbox.y+offset[1]))
 def player_anim(self):
     spritesheet = self.palletized_sprites[self.pallet]
     keys = pygame.key.get_pressed()
-    pygame.draw.rect(common.loaded_level.hud,(16,16,16),pygame.Rect(0,0,constants.screen_scale*24,constants.screen_scale*12))
-    pygame.draw.rect(common.loaded_level.hud,(128,16,16),pygame.Rect(-constants.screen_scale,-constants.screen_scale,constants.screen_scale*25,constants.screen_scale*13,),constants.screen_scale)
-    pygame.draw.rect(common.loaded_level.hud,(96,16,16),pygame.Rect(constants.screen_scale,constants.screen_scale,constants.screen_scale*21*(self.hp/self.max_hp),constants.screen_scale*9))
-    pygame.draw.rect(common.loaded_level.hud,(16,16,16),pygame.Rect(common.loaded_level.hud.get_width()-constants.screen_scale*23,0,constants.screen_scale*24,constants.screen_scale*12))
-    pygame.draw.rect(common.loaded_level.hud,(16,128,16),pygame.Rect(common.loaded_level.hud.get_width()-constants.screen_scale*24,-constants.screen_scale,constants.screen_scale*25,constants.screen_scale*13),constants.screen_scale)
-    pygame.draw.rect(common.loaded_level.hud,(16,96,16),pygame.Rect(common.loaded_level.hud.get_width()-constants.screen_scale*22,constants.screen_scale,constants.screen_scale*21*(self.xp%100/100),constants.screen_scale*9))
+    pygame.draw.rect(constants.layer_5,(16,16,16),pygame.Rect(0,0,constants.screen_scale*24,constants.screen_scale*12))
+    pygame.draw.rect(constants.layer_5,(128,16,16),pygame.Rect(-constants.screen_scale,-constants.screen_scale,constants.screen_scale*25,constants.screen_scale*13,),constants.screen_scale)
+    pygame.draw.rect(constants.layer_5,(96,16,16),pygame.Rect(constants.screen_scale,constants.screen_scale,constants.screen_scale*21*(self.hp/self.max_hp),constants.screen_scale*9))
+    pygame.draw.rect(constants.layer_5,(16,16,16),pygame.Rect(constants.layer_5.get_width()-constants.screen_scale*23,0,constants.screen_scale*24,constants.screen_scale*12))
+    pygame.draw.rect(constants.layer_5,(16,128,16),pygame.Rect(constants.layer_5.get_width()-constants.screen_scale*24,-constants.screen_scale,constants.screen_scale*25,constants.screen_scale*13),constants.screen_scale)
+    pygame.draw.rect(constants.layer_5,(16,96,16),pygame.Rect(constants.layer_5.get_width()-constants.screen_scale*22,constants.screen_scale,constants.screen_scale*21*(self.xp%100/100),constants.screen_scale*9))
     image = spritesheet[0][0]
     arm_image = spritesheet[3][1]
     x_vel = self.x_vel
@@ -143,7 +143,7 @@ def player_anim(self):
         angle-=90
         arm_image = pygame.transform.rotate(arm_image,angle)
         pos = (pos[0]-arm_image.get_width()/2,pos[1]-arm_image.get_height()/2)
-        common.loaded_level.hud.blit(arm_image,pos)
+        constants.layer_5.blit(arm_image,pos)
     else:
         if self.anim_flip:
             arm_image = pygame.transform.flip(arm_image,True,False)
@@ -153,15 +153,15 @@ def player_anim(self):
         image = pygame.transform.flip(image,True,False)
     offset = spritesheet[animation_type]["offset"]
     arm_offset = spritesheet[3]["offset"]
-    constants.WIN.blit(image,(self.hitbox.x+offset[0],self.hitbox.y+offset[1]))
+    constants.layer_2.blit(image,(self.hitbox.x+offset[0],self.hitbox.y+offset[1]))
     if not using_something and not self.facing_away:
-        constants.WIN.blit(arm_image,(self.hitbox.x+arm_offset[0],self.hitbox.y+arm_offset[1]))
+        constants.layer_5.blit(common.Scale(arm_image),((self.hitbox.x-common.loaded_level.camera[0]+arm_offset[0])*constants.screen_scale,(self.hitbox.y-common.loaded_level.camera[1]+arm_offset[1])*constants.screen_scale))
     if keys[pygame.K_p]:
         common.run = level.Run(0,os.urandom(16))
     if keys[pygame.K_g]:
-        common.loaded_level.hud.blit(common.Scale(common.run.intermediary_map,constants.screen_scale*2-1),(0,0))
+        constants.layer_5.blit(common.Scale(common.run.intermediary_map,constants.screen_scale*2-1),(0,0))
         if common.allticks%20<10:
-            pygame.draw.rect(common.loaded_level.hud,(255,255,255),pygame.Rect(common.global_position[0]*(constants.screen_scale*2-1),common.global_position[1]*(constants.screen_scale*2-1),constants.screen_scale*2-1,constants.screen_scale*2-1))
+            pygame.draw.rect(constants.layer_5,(255,255,255),pygame.Rect(common.global_position[0]*(constants.screen_scale*2-1),common.global_position[1]*(constants.screen_scale*2-1),constants.screen_scale*2-1,constants.screen_scale*2-1))
     if keys[pygame.K_h]:
         common.active_text = common.e
         common.active_text.is_open = True
@@ -179,15 +179,15 @@ def dangling_wire_anim(self):
         rect.y = self.y-self.hp/2-math.cos(value)*self.hp
         rect.w = self.x-rect.x
         rect.h = (self.y-rect.y)*2
-        pygame.draw.arc(constants.WIN,(40,40,40),rect,math.radians(-90),0)
+        pygame.draw.arc(constants.layer_3,(40,40,40),rect,math.radians(-90),0)
     elif value>=-0.1:
-        pygame.draw.line(constants.WIN,(40,40,40),(self.x,self.y-1),(self.x,self.y+self.hp*1.5))
+        pygame.draw.line(constants.layer_3,(40,40,40),(self.x,self.y-1),(self.x,self.y+self.hp*1.5))
     else:
         rect.x = self.x
         rect.y = self.y-self.hp/2-math.cos(-value)*self.hp
         rect.w = math.sin(-value)*self.hp*2
         rect.h = (self.y-rect.y)*2
-        pygame.draw.arc(constants.WIN,(40,40,40),rect,math.pi,math.radians(-90))
+        pygame.draw.arc(constants.layer_3,(40,40,40),rect,math.pi,math.radians(-90))
     if random.random()<0.005:
         duration = random.randint(180,220)
         common.NewThing(particle.Dust([rect.x+rect.w/2,rect.y+rect.h],particle.Spark,common.DynamicColor(pygame.Color(255,128,0),pygame.Color(255,255,64),2,100),duration),common.newparticles)
