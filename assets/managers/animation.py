@@ -5,17 +5,17 @@ import math,os
 def simple(self):
     pygame.draw.rect(constants.layer_2,(0,128,128),self.hitbox)
 def mite_anim(self):
-    x_vel = self.x_vel
-    y_vel = self.y_vel
+    x_vel = self.anim_x_vel
+    y_vel = self.anim_y_vel
     animation_type = 0
     image = self.spritesheet[1][0].copy()
     if x_vel<0:
         x_vel*=-1
     if y_vel<0:
         y_vel*=-1
-    if self.x_vel<0:
+    if self.anim_x_vel<0:
         self.anim_flip = True
-    elif self.x_vel>0:
+    elif self.anim_x_vel>0:
         self.anim_flip = False
     if self.grounded:
         self.animation_ticks.Trigger()
@@ -32,11 +32,11 @@ def mite_anim(self):
             image = self.spritesheet[2][0].copy()
             animation_type = 1
     else:
-        if self.y_vel>0.7:
+        if self.anim_y_vel>0.7:
             image = self.spritesheet[3][1].copy()
             self.animation_ticks.Reset()
             animation_type = 2
-        elif self.y_vel>0:
+        elif self.anim_y_vel>0:
             image = self.spritesheet[3][0].copy()
             self.animation_ticks.tick = 1
             animation_type = 2
@@ -61,16 +61,16 @@ def player_anim(self):
     pygame.draw.rect(constants.layer_5,(16,96,16),pygame.Rect(constants.layer_5.get_width()-constants.screen_scale*22,constants.screen_scale,constants.screen_scale*21*(self.xp%100/100),constants.screen_scale*9))
     image = spritesheet[0][0]
     arm_image = spritesheet[3][1]
-    x_vel = self.x_vel
-    y_vel = self.y_vel
+    x_vel = self.anim_x_vel
+    y_vel = self.anim_y_vel
     animation_type = 0
     if x_vel<0:
         x_vel*=-1
     if y_vel<0:
         y_vel*=-1
-    if self.x_vel<0:
+    if self.anim_x_vel<0:
         self.anim_flip = True
-    elif self.x_vel>0:
+    elif self.anim_x_vel>0:
         self.anim_flip = False
     if self.grounded:
         self.animation_ticks.Trigger()
@@ -105,13 +105,13 @@ def player_anim(self):
         if self.animation_ticks.tick>=35:
             self.animation_ticks.tick = 5
     else:
-        if self.y_vel>0.7:
+        if self.anim_y_vel>0.7:
             image = spritesheet[2][1]
             arm_image = spritesheet[3][6]
             self.animation_ticks.Reset()
             self.facing_away = False
             animation_type = 2
-        elif self.y_vel>0:
+        elif self.anim_y_vel>0:
             image = spritesheet[2][0]
             arm_image = spritesheet[3][5]
             self.animation_ticks.tick = 1
@@ -167,13 +167,13 @@ def player_anim(self):
         common.active_text.is_open = True
 def dangling_wire_anim(self):
     rect = pygame.Rect(0,0,0,0)
-    if self.deviation>0.3+self.pull_strength:
-        self.deviation = self.pull_strength+0.29
-    elif self.deviation<self.pull_strength-0.3:
-        self.deviation = self.pull_strength-0.29
-    else:
-        self.deviation+=(random.random()-0.5)*0.02
-    value = self.deviation
+    self.deviation += self.vel
+    self.vel -= self.accel
+    if self.deviation*self.direction<=0:
+        self.direction*=-1
+        self.accel*=-1
+        self.vel=(random.random()+2)*self.direction-common.loaded_level.windH
+    value = self.deviation/60
     if value>0.1:
         rect.x = self.x-math.sin(value)*self.hp*2
         rect.y = self.y-self.hp/2-math.cos(value)*self.hp

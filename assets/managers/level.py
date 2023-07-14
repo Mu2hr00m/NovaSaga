@@ -2,178 +2,131 @@ from assets.managers import common
 from assets.managers import constants
 from assets.managers import entity,particle,ai,items
 import os,random,json,pygame,math,pygame.gfxdraw
-class Box():
-    def __init__(self,rect):
-        self.rect = rect
-        self.hidden = False
-        self.points = []
-    def Draw(self,forcedraw=False):
-        if not self.hidden or forcedraw: #check wheter or not the box is hidden, or if its being forced to draw
-            neg_player_y = int(-common.player.y+4)  #unflip player y and the rect y positions
-            player_x = int(common.player.x)+0.1
-            player_y = int(common.player.y-4)
-            point9 = None
-            camera_height = common.loaded_level.camera_surface.get_height() #get camera values, used to keep the drawn polygons onscreen
-            camera_width = common.loaded_level.camera_surface.get_width()
-            camera_x = common.loaded_level.camera_surface.get_offset()[0]
-            camera_y = common.loaded_level.camera_surface.get_offset()[1]
-            e = common.loaded_level.camera_surface.get_rect() #prepare for checking whether or not the box is onscreen
-            e.x = camera_x
-            e.y = camera_y
-            x = self.rect.x
-            y = self.rect.y
-            x2 = x+self.rect.w
-            y2 = y+self.rect.h
-            if self.rect.colliderect(e): #check if the box is onscreen
-                if x<camera_x: #constrain the x and y to within the screen
-                    x=camera_x-1
-                if x2>camera_x+camera_width:
-                    x2=camera_x+camera_width+1
-                if y<camera_y:
-                    y=camera_y-1
-                if y2>camera_y+camera_height:
-                    y2=camera_y+camera_height+1
-                if player_x>x2: #prepare some x positions for the screen edges
-                    x_value_1 = camera_x
-                    x_value_2 = camera_x
-                elif player_x>x and common.player.y>y2:
-                    x_value_1 = camera_width+camera_x
-                    x_value_2 = camera_x
-                elif player_x>x and common.player.y<y:
-                    x_value_1 = camera_x
-                    x_value_2 = camera_width+camera_x
-                else:
-                    x_value_1 = camera_width+camera_x
-                    x_value_2 = camera_width+camera_x
-                if player_y<=y and player_x>=x2: #determine where the player is in relation to the box
-                    point1 = (x,-y)              #then thats used to place the proper points on the box
-                    point2 = (x2,-y2)
-                    point8 = (x,y2)
-                elif player_y>=y2+1 and player_x>=x2:
-                    point1 = (x2,-y)
-                    point2 = (x,-y2)
-                    point8 = (x,y)
-                elif player_y>=y2+1 and player_x<=x:
-                    point1 = (x2,-y2)
-                    point2 = (x,-y)
-                    point8 = (x2,y)
-                elif player_y<=y and player_x<=x:
-                    point1 = (x,-y2)
-                    point2 = (x2,-y)
-                    point8 = (x2,y2)
-                elif player_y<=y:
-                    point1 = (x2,-y)
-                    point2 = (x,-y)
-                    point8 = (x2,y2)
-                    point9 = (x, y2)
-                elif player_x>x2:
-                    point1 = (x2,-y)
-                    point2 = (x2,-y2)
-                    point8 = (x,y)
-                    point9 = (x,y2)
-                elif player_y>=y2+1:
-                    point1 = (x,-y2)
-                    point2 = (x2,-y2)
-                    point8 = (x,y)
-                    point9 = (x2,y)
-                elif player_x<=x:
-                    point1 = (x,-y2)
-                    point2 = (x,-y)
-                    point8 = (x2,y2)
-                    point9 = (x2,y)
-                else:
-                    point1 = (x,-y)
-                    point2 = (x,-y)
-                    point8 = (x,y)
-                slope2 = (point1[1]-neg_player_y)/(point1[0]-player_x) #compute the slopes, for use later
-                slope1 = (point2[1]-neg_player_y)/(point2[0]-player_x)
-                y_value1 = -(neg_player_y-((player_x-x_value_1)*slope1)) #compute the y values, using adjusted point-slope form
-                y_value2 = -(neg_player_y-((player_x-x_value_2)*slope2)) #2 x values, a y value, and a slope
-                if y_value1<=camera_y:  #check if the y values are offscreen, and if they are, set the y value within the screen
-                    y_value1 = camera_y #and compute the x value for where that line intersects the y value
-                    x_value_1 = player_x-((neg_player_y+camera_y)/slope1)
-                elif y_value1>=camera_height+camera_y:
-                    y_value1 = camera_height+camera_y
-                    x_value_1 = player_x-((neg_player_y+camera_height+camera_y)/slope1)
-                if y_value2<=camera_y:
-                    y_value2 = camera_y
-                    x_value_2 = player_x-((neg_player_y+camera_y)/slope2)
-                elif y_value2>=camera_height+camera_y:
-                    y_value2 = camera_height+camera_y
-                    x_value_2 = player_x-((neg_player_y+camera_height+camera_y)/slope2)
-                point1 = (point1[0],-point1[1]) #compensate for the reversed y-axis
-                point2 = (point2[0],-point2[1])
-                if point1==(x2,y):
-                    point1 = (point1[0]-1,point1[1])
-                elif point1==(x2,y2):
-                    point1 = (point1[0]-1,point1[1]-1)
-                elif point1==(x,y2):
-                    point1 = (point1[0],point1[1]-1)
-                if point2==(x2,y):
-                    point2 = (point2[0]-1,point2[1])
-                elif point2==(x2,y2):
-                    point2 = (point2[0]-1,point2[1]-1)
-                elif point2==(x,y2):
-                    point2 = (point2[0],point2[1]-1)
-                point3 = (x_value_1,y_value1) #write some points, these are the edge points
-                point4 = (x_value_2,y_value2)
-                points = [point1,point8]
-                if point9!=None:
-                    points.append(point9)
-                points.append(point2)
-                points.append(point3)
-                if not (y_value1==y_value2 or x_value_1==x_value_2):  #adds extra points in the corners where needed, else there'll be a triangular gap
-                    if (y_value1==camera_y and y_value2==camera_height+camera_y) or (y_value1==camera_height+camera_y and y_value2==camera_y): #whenever 1 y value leaves the screen and the other doesn't
-                        if player_x>=x: #statements with 2 points being made account for the rare scenario in which points are on opposite edges
-                            points.append((camera_x,camera_height+camera_y))
-                            points.append((camera_x,camera_y))
-                        else:
-                            points.append((camera_width+camera_x,camera_y))
-                            points.append((camera_width+camera_x,camera_height+camera_y))
-                    elif (x_value_1==camera_x and x_value_2==camera_width+camera_x) or (x_value_1==camera_width+camera_x and x_value_2==camera_x):
-                        if player_y>=y:                                       #account for points on adjacent edges
-                            points.append((camera_width+camera_x,camera_y))
-                            points.append((camera_x,camera_y))
-                        else:
-                            points.append((camera_x,camera_height+camera_y))
-                            points.append((camera_width+camera_x,camera_height+camera_y))
-                    elif y_value2==camera_y or y_value2==camera_height+camera_y: #accounts for the points being on adjacent edges
-                        points.append((x_value_1,y_value2))
-                    else:
-                        points.append((x_value_2,y_value1))
-                points.append(point4)
-                self.points = points
-                pygame.draw.polygon(constants.layer_4,(0,1,0),points)
-                #draw the polygon (finally)
-    def afterdraw(self,forcedraw=False):
-        pass
-        #if (not self.hidden or forcedraw) and len(self.points)>=3:
-        #    pygame.gfxdraw.filled_polygon(constants.layer_4_a,self.points,(0,128,0,128))
 class Edge():
-    def __init__(self,pos1,pos2,facing):
+    def __init__(self,pos1,pos2):
+        if pos1[0]<pos2[0]:
+            self.facing=0
+            pos1=(pos1[0],pos1[1]+1)
+            pos2=(pos2[0],pos2[1]+1)
+            if not common.out_of_bounds((pos1[0]-1,pos1[1])):
+                if common.loaded_level.collision.get_at((pos1[0]-1,pos1[1]))==0:
+                    pos1=(pos1[0]-1,pos1[1])
+            if not common.out_of_bounds((pos2[0]+1,pos2[1])):
+                if common.loaded_level.collision.get_at((pos2[0]+1,pos2[1]))==0:
+                    pos2=(pos2[0]+1,pos2[1])
+        elif pos1[0]>pos2[0]:
+            self.facing=2
+            pos1=(pos1[0],pos1[1]-1)
+            pos2=(pos2[0],pos2[1]-1)
+            if not common.out_of_bounds((pos1[0]+1,pos1[1])):
+                if common.loaded_level.collision.get_at((pos1[0]+1,pos1[1]))==0:
+                    pos1=(pos1[0]+1,pos1[1])
+            if not common.out_of_bounds((pos2[0]-1,pos2[1])):
+                if common.loaded_level.collision.get_at((pos2[0]-1,pos2[1]))==0:
+                    pos2=(pos2[0]-1,pos2[1])
+        elif pos1[1]<pos2[1]:
+            self.facing=1
+            pos1=(pos1[0]-1,pos1[1])
+            pos2=(pos2[0]-1,pos2[1])
+            if not common.out_of_bounds((pos1[0],pos1[1]-1)):
+                if common.loaded_level.collision.get_at((pos1[0],pos1[1]-1))==0:
+                    pos1=(pos1[0],pos1[1]-1)
+            if not common.out_of_bounds((pos2[0],pos2[1]+1)):
+                if common.loaded_level.collision.get_at((pos2[0],pos2[1]+1))==0:
+                    pos2=(pos2[0],pos2[1]+1)
+        elif pos1[1]>pos2[1]:
+            self.facing=3
+            pos1=(pos1[0]+1,pos1[1])
+            pos2=(pos2[0]+1,pos2[1])
+            if not common.out_of_bounds((pos1[0],pos1[1]+1)):
+                if common.loaded_level.collision.get_at((pos1[0],pos1[1]+1))==0:
+                    pos1=(pos1[0],pos1[1]+1)
+            if not common.out_of_bounds((pos2[0],pos2[1]-1)):
+                if common.loaded_level.collision.get_at((pos2[0],pos2[1]-1))==0:
+                    pos2=(pos2[0],pos2[1]-1)
         self.pos1 = pos1
         self.pos2 = pos2
-        self.facing = facing
     def Draw(self,forcedraw=False):
-        player_x = common.player.x
-        player_y = common.player.y*-1+constants.layer_1.get_size()[1]
+        player_x = int(common.player.x)
+        player_y = int(common.player.y-4)
+        neg_player_y = int(-common.player.y+4)
         camera_height = common.loaded_level.camera_surface.get_height() #get camera values, used to keep the drawn polygons onscreen
         camera_width = common.loaded_level.camera_surface.get_width()
         camera_x = common.loaded_level.camera_surface.get_offset()[0]
         camera_y = common.loaded_level.camera_surface.get_offset()[1]
-        if (not forcedraw) and (constants.layer_1.get_bounding_rect().collidepoint(self.pos1[0],self.pos1[1]) or constants.layer_1.get_bounding_rect().collidepoint(self.pos2[0],self.pos2[1])):
+        pos1 = (self.pos1[0],-self.pos1[1])
+        pos2 = (self.pos2[0],-self.pos2[1])
+        if (not forcedraw) and (not common.out_of_bounds((self.pos1[0],self.pos1[1])) or not common.out_of_bounds((self.pos1[0],self.pos1[1]))):
             points = [self.pos1,self.pos2]
-            if self.facing==0 and common.player.y>=self.pos1[0]:
-                if not player_x==self.pos1[0] and not player_x==self.pos2[0]:
-                    if player_x<=self.pos1[0]:
-                        x_1 = camera_x+camera_width
-                        x_2 = camera_x+camera_width
-                    slope1 = (self.pos1[1]-player_y)/(self.pos1[0]-player_x)
-                    slope2 = (self.pos2[1]-player_y)/(self.pos2[0]-player_x)
-                    y_1 = -(player_y-((player_x-x_1)*slope1)) #compute the y values, using adjusted point-slope form
-                    y_2 = -(player_y-((player_x-x_2)*slope2))
-                    points.append((x_2,y_2),(x_1,y_1))
+            if (self.facing==1 and player_x>=self.pos1[0]) or (self.facing==3 and player_x<=self.pos1[0]): #horizontal edges
+                if player_x<=self.pos1[0]:
+                    x_1 = camera_x+camera_width
+                    x_2 = camera_x+camera_width
+                else:
+                    x_1 = camera_x
+                    x_2 = camera_x
+                try:
+                    slope1 = (pos1[1]-neg_player_y)/(pos1[0]-player_x)
+                    slope2 = (pos2[1]-neg_player_y)/(pos2[0]-player_x)
+                except ZeroDivisionError:
+                    if player_y<max(self.pos1[1],self.pos2[1]):
+                        pygame.draw.line(constants.layer_4,(0,1,0),(self.pos1[0],max(self.pos1[1],self.pos2[1])),(self.pos1[0],camera_y+camera_height))
+                    else:
+                        pygame.draw.line(constants.layer_4,(0,1,0),(self.pos1[0],min(self.pos1[1],self.pos2[1])),(self.pos1[0],camera_y))
+                else:
+                    y_1 = -(neg_player_y-((player_x-x_1)*slope1)) #compute the y values, using adjusted point-slope form
+                    y_2 = -(neg_player_y-((player_x-x_2)*slope2))
+                    points.append((x_2,y_2))
+                    points.append((x_1,y_1))
                     pygame.draw.polygon(constants.layer_4,(0,1,0),points)
+            elif (self.facing==0 and player_y<=self.pos1[1]) or (self.facing==2 and player_y>=self.pos1[1]): #vertical edges
+                if player_x<self.pos1[0]:
+                    x_1 = camera_x+camera_width
+                elif player_x==self.pos1[0]:
+                    x_1 = self.pos1[0]
+                else:
+                    x_1 = camera_x
+                if player_x<self.pos2[0]:
+                    x_2 = camera_x+camera_width
+                elif player_x==self.pos2[0]:
+                    x_2 = self.pos2[0]
+                else:
+                    x_2 = camera_x
+                try:
+                    slope1 = (pos1[1]-neg_player_y)/(pos1[0]-player_x)
+                    slope2 = (pos2[1]-neg_player_y)/(pos2[0]-player_x)
+                except ZeroDivisionError:
+                    if player_x==pos1[0]:
+                        if player_y<pos1[1] or self.facing==0:
+                            y_1=camera_height+camera_y
+                        else:
+                            y_1=camera_y
+                        slope2 = (pos2[1]-neg_player_y)/(pos2[0]-player_x)
+                        y_2 = -(neg_player_y-((player_x-x_2)*slope2))
+                    else:
+                        if player_y<pos1[1] or self.facing==0:
+                            y_2=camera_height+camera_y
+                        else:
+                            y_2=camera_y
+                        slope1 = (pos1[1]-neg_player_y)/(pos1[0]-player_x)
+                        y_1 = -(neg_player_y-((player_x-x_1)*slope1))
+                else:
+                    y_1 = -(neg_player_y-((player_x-x_1)*slope1)) #compute the y values, using adjusted point-slope form
+                    y_2 = -(neg_player_y-((player_x-x_2)*slope2))
+                points.append((x_2,y_2))
+                points.append((x_1,y_1))
+                pygame.draw.polygon(constants.layer_4,(0,1,0),points)
+    def afterdraw(self):
+        pygame.draw.line(constants.layer_4,(0,254,0),self.pos1,self.pos2)
+        half_pos = (int((self.pos1[0]+self.pos2[0])/2),int((self.pos1[1]+self.pos2[1])/2))
+        if self.facing==2:
+            pygame.draw.line(constants.layer_4,(0,254,0),half_pos,(half_pos[0],half_pos[1]+2))
+        if self.facing==1:
+            pygame.draw.line(constants.layer_4,(0,254,0),half_pos,(half_pos[0]+2,half_pos[1]))
+        if self.facing==0:
+            pygame.draw.line(constants.layer_4,(0,254,0),half_pos,(half_pos[0],half_pos[1]-2))
+        if self.facing==3:
+            pygame.draw.line(constants.layer_4,(0,254,0),half_pos,(half_pos[0]-2,half_pos[1]))
 class Background():
     def __init__(self,data:dict,image:pygame.Surface)->None:
         self.scroll_x = data.get("scroll_x",0)
@@ -228,6 +181,8 @@ class Level():
         self.name = "simple"
         self.camera_surface = constants.layer_4.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT)
         self.camera = [0,0]
+        self.windH = 0
+        self.globalWindH = 0
     def play_music(self):
         if len(self.music)>1:
             self.music[random.randint(0,len(self.music)-1)].play_music()
@@ -261,20 +216,16 @@ class Level():
             self.collision_texture = pygame.transform.scale(self.collision_texture,(self.collision_texture.get_width()*data["level_scale"],self.collision_texture.get_height()*data["level_scale"]))
         self.collision = pygame.mask.from_surface(self.collision_texture) #make collision
         self.camera = [0,0]                                               #make camera
+        constants.layer_0 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
         constants.layer_1 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
         constants.layer_2 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
         constants.layer_3 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
         constants.layer_4 = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size()))
         constants.layer_4_a = pygame.transform.scale(constants.layer_1,(self.display_texture.get_size())) #make the main level surface from the display texture
-        self.camera_surface = constants.layer_4.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT) #make the camera, which is a subsurface of the level surface
+        self.camera_surface = constants.layer_0.subsurface(0,0,constants.CAM_WIDTH,constants.CAM_HEIGHT) #make the camera, which is a subsurface of the level surface
         common.boxes.clear()                      #clear out various lists, in case they have stuff left over from the previous level
         common.delparticles.extend(common.particles.keys())
         common.delentities.extend(common.entities.keys())
-        try:
-            for i in data["boxes"]:
-                common.NewThing(Box(pygame.Rect(i["x"],i["y"],i["w"],i["h"])),common.boxes) #add extra boxes w/o collision
-        except:
-            pass
         try:
             for i in data["level_transitions"]:
                 if i["style"]=="old":
@@ -283,150 +234,38 @@ class Level():
                     common.NewThing(entity.DynamicTransitionObject(pygame.Rect(i["x"],i["y"],i["w"],i['h']),i["transition_id"],(i["dest_x"],i["dest_y"]),common.global_position),common.newentities)
         except:
             pass
-        try:
-            for i in data["enemies"]:
+        for i in data["enemies"]:
+            try:
                 if i.get("always_spawns",False): #add enemies with the always_spawns tag as true, defaults to false
                     entity.new_entity(i["x"],i["y"],i["hp"],i["type"]) #add enemies
-        except:
-            pass
+                else:
+                    print("enemy of type {0} wasnt spawned",i["type"])
+            except Exception as e:
+                common.ExceptionPrinter(e)
+        self.globalWindH = data.get("hwind",0)
+        self.windH = data.get("hwind",0)
         print(common.newentities)
         if data.get("particle_spawners",None)!=None:
             for i in data["particle_spawners"]:
                 common.NewThing(particle.ParticleArea(pygame.Rect(i["x"],i["y"],i["w"],i["h"]),i["freq"],i["color"],i["behavior"],i["duration"],i["variation"]))
-        k=0
-        m=0
-        '''edgelist = []
-        self.collision.invert()
+        edgelist = []
         collision_objects = self.collision.connected_components()
-        for object in collision_objects:
-            x=0
-            y=0
-            finding_point = True
-            while finding_point:
-                x+=1
-                if common.out_of_bounds((x,y)):
-                    x=0
-                    y+=1
-                if object.get_at((x,y))>=1:
-                    finding_point = False
-            print((x,y))
-            start = [x,y]
-            point = (x,y)
-            pos = [x+1,y]
-            prev_pos = [x,y]
-            direction = 1
-            while pos!=start:
-                prev_pos = [pos[0],pos[1]]
-                print(pos)
-                if not common.out_of_bounds((x,y-1)):
-                    up = object.get_at((x,y-1))
-                else:
-                    up = 0
-                if not common.out_of_bounds((x,y+1)):
-                    down = object.get_at((x,y+1))
-                else:
-                    down = 0
-                if not common.out_of_bounds((x+1,y)):
-                    right = object.get_at((x+1,y))
-                else:
-                    right = 0
-                if not common.out_of_bounds((x-1,y)):
-                    left = object.get_at((x-1,y))
-                else:
-                    left = 0
-                if up==0 and right==1 and down==1 and left==1:
-                    pos[0]+=1
-                elif up==1 and right==1 and down==0 and left==1:
-                    pos[0]-=1
-                elif up==1 and right==0 and down==1 and left==1:
-                    pos[1]+=1
-                elif up==1 and right==1 and down==1 and left==0:
-                    pos[1]-=1
-                elif up==0 and right==0 and down==1 and left==1:
-                    edgelist.append(Edge(point,pos,2))
-                    print("2")
-                    point = (pos[0],pos[1])
-                    pos[1]+=1
-                    direction = 2
-                elif up==1 and right==0 and down==0 and left==1:
-                    edgelist.append(Edge(point,pos,3))
-                    print("3")
-                    point = (pos[0],pos[1])
-                    pos[0]-=1
-                    direction = 3
-                elif up==1 and right==1 and down==0 and left==0:
-                    edgelist.append(Edge(point,pos,0))
-                    print("0")
-                    point = (pos[0],pos[1])
-                    pos[1]-=1
-                    direction = 0
-                elif up==0 and right==1 and down==1 and left==0:
-                    edgelist.append(Edge(point,pos,1))
-                    print("1")
-                    point = (pos[0],pos[1])
-                    pos[0]+=1
-                    direction = 1
-                elif up==1 and right==1 and down==1 and left==1:
-                    if direction<3:
-                        edgelist.append(Edge(point,pos,direction+1))
-                        print(direction+1)
-                    else:
-                        edgelist.append(Edge(point,pos,0))
-                        print("0")
-                    point = (pos[0],pos[1])
-                    if direction==0:
-                        direction=3
-                        pos[0]-=1
-                    elif direction==1:
-                        direction=0
-                        pos[1]-=1
-                    elif direction==2:
-                        direction=1
-                        pos[0]+=1
-                    else:
-                        direction=2
-                        pos[1]+=1
-                if (pos==prev_pos) or common.out_of_bounds(pos):
-                    raise RuntimeError("Edge finder hung at "+str(pos))
-
-        self.collision.invert()'''
-        boxrectlist = []                                                     #all this is the algorithm for making the boxes
-        for i in range(0,self.collision_texture.get_width()-1):              #for each x
-            for j in range(0,self.collision_texture.get_height()-1):         #for each y
-                rect = pygame.Rect(i,j,1,1)
-                if rect.collidelist(boxrectlist)==-1 and self.collision.get_at((i,j))==1: #check the point isnt already in a box
-                    newbox= pygame.Rect(i,j,1,1)  #make a box
-                    k=0
-                    while True:
-                        if newbox.x+k<constants.layer_1.get_width()-1:         #go as far right as possible
-                            if self.collision.get_at((newbox.x+k,j))==0:
-                                break
-                        else:
-                            break
-                        if k>constants.MAX_RECT_SIZE:
-                            break
-                        k+=1
-                    newbox.w=k #set the width
-                    newbox.h=constants.layer_1.get_height()-newbox.y-1
-                    for l in range(newbox.x,newbox.x+newbox.w):         #go as far down as possible, keeping the shortest column for the height
-                        m=0
-                        while True:
-                            if not (l>constants.layer_1.get_width()-1 or newbox.y+m>constants.layer_1.get_height()-1):
-                                if self.collision.get_at((l,newbox.y+m))==0:
-                                    break
-                            else:
-                                break
-                            if m>=newbox.h or m>constants.MAX_RECT_SIZE:
-                                break
-                            m+=1
-                        newbox.h=m
-                    if not (newbox.w==0 or newbox.h==0): #check that the rect isnt invalid
-                        boxrectlist.append(newbox)       #then add the box
-        #print(len(edgelist))
-        #for i in edgelist:
-        #    common.NewThing(i,common.boxes)
-        for i in boxrectlist:     #for every rect in the box list, make an actual Box class
-            common.NewThing(Box(i),common.boxes)
+        try:
+            for object in collision_objects:
+                outline = object.outline()
+                j = outline[0]
+                k = outline[0]
+                for i in outline:
+                    if not i[0]==k[0] and not i[1]==k[1]:
+                        edgelist.append(Edge(j,k))
+                        k=j
+                    j=i
+                edgelist.append(Edge(outline[0],k))
+        except Exception as e:
+            common.ExceptionPrinter(e)
+        for i in edgelist: #loooong if statement on line below removes edges with both corners on the corners of the inside bounds
+            if not (common.out_of_bounds(i.pos1,2) and common.out_of_bounds(i.pos2,2)):
+                common.NewThing(i,common.boxes)
         getattr(common.run,common.current_map+"_map").blit(getattr(common.run,common.current_map).map.subsurface(pygame.Rect(common.global_position[0]-1,common.global_position[1]-1,3,3)),(common.global_position[0]-1,common.global_position[1]-1))
     def update_camera(self,pos=None):
         if pos!=None:                #make a hook for placing the camera wherever
@@ -442,7 +281,7 @@ class Level():
             self.camera[1] = 0
         if self.camera[1]+constants.CAM_HEIGHT>=constants.layer_1.get_height():
             self.camera[1] = constants.layer_1.get_height()-constants.CAM_HEIGHT
-        self.camera_surface = constants.layer_4.subsurface(self.camera[0],self.camera[1],constants.CAM_WIDTH,constants.CAM_HEIGHT) #update the camera subsurface
+        self.camera_surface = constants.layer_0.subsurface(self.camera[0],self.camera[1],constants.CAM_WIDTH,constants.CAM_HEIGHT) #update the camera subsurface
         self.camera_surface.get_view()
 class Node():
     def __init__(self,pos,type,maxconnections,owner): #not really used, might be used later
@@ -628,7 +467,7 @@ class Run():
         common.player.AIpointer = ai.playerAI
         common.player.overlay_active = True
         common.player.inventory["main_0"] = items.items["gun"]
-        common.player.inventory["main_1"] = items.items["gun2"]
+        common.player.inventory["main_1"] = items.items["flashlight"]
         common.player.facing_away = True
         common.current_map = "intermediary"
         random.seed(self.seed)

@@ -61,6 +61,11 @@ def GetPressed(control)->bool:
                 return PressedKeysNoCooldown[Key]
     else:
         return PressedKeysNoCooldown[Key]
+def ExceptionPrinter(exception:Exception):
+    exceptionType = str(type(exception))
+    exceptionType = exceptionType.split("\'")[1]
+    exceptionModule = str(exception.__traceback__.tb_frame).split("\'")[1]
+    print("exception of type {0} caught on line {1} in file {2}: {3}".format(exceptionType,exception.__traceback__.tb_lineno,exceptionModule,exception))
 class DynamicColor():
     def __init__(self,color1:pygame.Color,color2:pygame.Color,color_index:int,frequency:int,include_alpha=False):
         self.color1 = color1
@@ -119,10 +124,11 @@ def out_of_bounds(pos,safety = 0):
     if pos[1]<safety or pos[1]>constants.layer_1.get_height()-1-safety:
         oob = True
     return oob
-def Font(color,rect=pygame.Rect,text=str,size=1,dest_surface=loaded_level.hud):
+def Font(color,rect=pygame.Rect,text=str,size=1,dest_surface=constants.layer_5):
     return_surface = False
     if type(dest_surface)!=pygame.Surface:
         dest_surface=pygame.Surface((rect.w,rect.h))
+        dest_surface.set_colorkey((0,0,0))
         return_surface=True
     cur_pos = [rect.x,rect.y]
     base = small_font["scaled_"+str(size)].copy()
@@ -213,9 +219,13 @@ backgrounds = []
 e=None
 global_position = (0,0)
 run = None
-tick = 0
+frametime_total = 0
+frametime_draw = 0
+frametime_draw_reads = [0,0,0,0,0,0,0,0,0,0]
+frametime_draw_pos = Ticker(9)
+frametime_physics = 0
 fps = 0
-allticks = 0
+sharp_fps = 0
 PressedKeys = constants.keyboard_binds.copy()
 PressedKeys.update({"mouse1":False,"mouse2":False,"mouse3":False,"mouse4":False,"mouse5":False})
 KeyCooldown = PressedKeys.copy()

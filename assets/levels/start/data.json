@@ -1,6 +1,7 @@
 {
     "level_scale": 4,
     "type": "start",
+    "hwind":0,
     "level_transitions": [
         {
             "style": "new",
@@ -19,7 +20,7 @@
             "hp": 5,
             "x": 155,
             "y": 100,
-            "always_spawns": false
+            "always_spawns": true
         },
         {
             "type": "dangle_wire",

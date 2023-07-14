@@ -52,6 +52,9 @@ class Entity():
         self.y = 0
         self.x_vel = 0
         self.y_vel = 0
+        self.anim_x_vel = 0
+        self.anim_y_vel = 0
+        self.wind_mult = 1
         self.angle = 0
         self.max_hp = constants.DEF_HP
         self.hp = int(constants.DEF_HP/2)
@@ -82,8 +85,10 @@ class Entity():
             self.Animation = animation.dangling_wire_anim
             self.animation_ticks.threshold = math.pi
             self.hitbox = pygame.Rect(0,0,0,0)
-            self.pull_strength = 0
+            self.accel = 0.06
             self.deviation = 0
+            self.vel = 0.5
+            self.direction = 1
             self.name = "None"
         for i in os.listdir(constants.PORTRAIT_PATH):
             item = i.split("-",1)
@@ -100,6 +105,7 @@ class Entity():
         pygame.draw.circle(self.overlay,(18,18,18,48),(self.overlay.get_width()/2,self.overlay.get_height()/2),40)
         pygame.draw.circle(self.overlay,(1,1,1,0),(self.overlay.get_width()/2,self.overlay.get_height()/2),16)
         self.overlay = common.Scale(self.overlay)
+        self.editable_overlay = self.overlay.copy()
         if self.name!="None":
             self.spritesheet = common.Spritesheet(os.path.join("assets","sprites",texturepath+"_sprites.png"))
             self.palletized_sprites = []
@@ -157,36 +163,46 @@ class Entity():
                         collide +=1
         return collide
     def update_physics(self,up=False,left=False,right=False):
+        wind = constants.WIND_PUSH*self.wind_mult*common.loaded_level.windH
         if self.hitbox.w==0 and self.hitbox.h==0:
             return None
         self.iframes.Tick()
+        self.x_vel+=wind
+        max_right = self.max_speed+wind*3
+        max_left = -1*self.max_speed+wind*3
+        if not self.grounded:
+            max_right += constants.WIND_MAX*self.wind_mult*common.loaded_level.windH*0.5
+            max_left += constants.WIND_MAX*self.wind_mult*common.loaded_level.windH*0.5
         if not (right or left):
             if self.grounded:
-                self.x_vel *= self.ground_drag
+                if self.x_vel>0:
+                    self.x_vel *= self.ground_drag+wind
+                else:
+                    self.x_vel *= self.ground_drag-wind
             else:
                 self.x_vel *= self.air_drag
         new_y_vel = self.y_vel + self.grav
         if not new_y_vel>=self.max_fall and not self.grounded:
             self.y_vel = new_y_vel
-        if self.x_vel > self.max_speed:
-            self.x_vel = self.max_speed
-        if self.x_vel < -1*self.max_speed:
-            self.x_vel = -1*self.max_speed
+        if self.x_vel > max_right:
+            self.x_vel = max_right
+        if self.x_vel < max_left:
+            self.x_vel = max_left
         if up and self.grounded_ticks>=-3 and self.has_jumped==False:
             self.y_vel -= self.jump
             self.has_jumped = True
             if self.y_vel>=self.jump:
                 self.y_vel = -self.jump
-        elif left and self.x_vel>-self.max_speed:
+        elif left and self.x_vel>max_left:
             if self.grounded:
                 self.x_vel -= self.accel
             else:
-                self.x_vel -= self.air_accel
-        elif right and self.x_vel<self.max_speed:
+                self.x_vel -= self.air_accel+wind
+        elif right and self.x_vel<max_right:
             if self.grounded:
                 self.x_vel += self.accel
             else:
-                self.x_vel += self.air_accel
+                self.x_vel += self.air_accel-wind
         if self.x+self.x_vel-(self.hitbox.w/2)<0:
             self.x=self.hitbox.w/2
             self.x_vel=0
@@ -205,6 +221,8 @@ class Entity():
             self.y += self.y_vel
         if self.x_vel<=0.01 and self.x_vel>=-0.01:
             self.x_vel = 0
+        self.anim_x_vel = self.x_vel-wind
+        self.anim_y_vel = self.y_vel
         self.hitbox.x = self.x-self.texture_size[0]
         self.hitbox.y = self.y-self.texture_size[1]
         still_colliding = True

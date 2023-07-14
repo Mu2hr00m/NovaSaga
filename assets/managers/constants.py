@@ -21,6 +21,8 @@ MAX_FALL = 3
 DEF_ACCEL = 0.14
 DEF_AIR_ACCEL = 0.06
 DEF_JUMP = 3
+WIND_PUSH = 0.1
+WIND_MAX = 1
 MAX_SPEED = 1
 MAX_RECT_SIZE = 1024
 FPS = 60
@@ -30,7 +32,7 @@ ITEM_PATH = os.path.join("assets","sprites","items")
 PROJ_PATH = os.path.join("assets","sprites","projectile")
 ui_path = os.path.join("assets","managers","menu_ui")
 disp_win = pygame.display.set_mode((WIDTH*screen_scale,HEIGHT*screen_scale),depth=32)
-title_subtitles = ["Nova Saga: ","Mirror Worlds","The Unknown","Brain Games","The Game","LLOORREE!!!","Inspired by FTL","Inspired by Terraria","All Inclusive!","Indie Game!","Inspired by 20 Minutes till Dawn","Multiverse Theory","Quantum Mechanics","Uploading to human.exe","Not an Asteroid","Not Mind Controlling You"]
+title_subtitles = ["Nova Saga: ","Mirror Worlds","The Unknown","Brain Games","The Game","LLOORREE!!!","Tm92YSBTYWdhOiBOb3ZhIFNhZ2E6IE5vdmEgU2FnYTogTm92YSBTYWdhIQ==","Inspired by Terraria","All Inclusive!","Indie Game!","Inspired by 20 Minutes till Dawn","Multiverse Theory","Quantum Mechanics","Uploading to human.exe","Not an Asteroid","Not Mind Controlling You"]
 pygame.display.set_caption(title_subtitles[0]+title_subtitles[random.randint(1,len(title_subtitles)-1)])
 if pygame.display.get_caption()[0]=="Nova Saga: All Inclusive!":
     pygame.display.set_icon(pygame.image.load(os.path.join(ui_path,"rainbow-icon.png")))
