@@ -183,6 +183,7 @@ class Level():
         self.camera = [0,0]
         self.windH = 0
         self.globalWindH = 0
+    def __repr__(self):return "Level "+self.name
     def play_music(self):
         if len(self.music)>1:
             self.music[random.randint(0,len(self.music)-1)].play_music()

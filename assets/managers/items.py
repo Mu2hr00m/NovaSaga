@@ -11,6 +11,8 @@ class Item():
         self.texture = self.spritesheet[0][0]
         self.inv_texture = common.Scale(self.spritesheet[1][0])
         self.on_use = on_use
+    def __repr__(self):
+        return "Item with id {0} and type {0}".format(self.id,self.type)
 def basic(self):
     spread = random.randint(-2,2)
     if not self.cooldown.active:

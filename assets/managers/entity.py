@@ -293,6 +293,7 @@ class Entity():
             angle -=180
         angle+=180
         self.angle = angle
+    def __repr__(self):return "Entity {0} at {2}, {3} with AI {4} and animator {1}".format(self.name,self.Animation.__name__,self.x,self.y,self.AIpointer.__name__)
 class TransitionObject():
     def __init__(self,rect,dest,dest_level):
         self.rect = rect
@@ -357,6 +358,7 @@ class DynamicTransitionObject():
                 if i.id==self.dest_id:
                     common.player.x = i.dest[0]
                     common.player.y = i.dest[1]
+    def __repr__(self):return "DynamicTransitionObject at {0}, {1} to {2}, {3}".format(self.rect.x,self.rect.y,self.rect.x+self.rect.w,self.rect.h+self.rect.y)
 def new_entity(x,y,maxhp,type,xp=0):
     entity = Entity(type,type,xp)
     entity.x = x

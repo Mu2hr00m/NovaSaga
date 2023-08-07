@@ -47,6 +47,9 @@ class Ticker():
     def Reset(self):
         self.tick = -1
         self.active = False
+    def __repr__(self):
+        if self.active:return "Ticker with threshold of {0} and tick at {1} and is active".format(self.threshold,self.tick)
+        return "Ticker with threshold of {0} and tick at {1} and is inactive".format(self.threshold,self.tick)
 def Scale(surface:pygame.Surface,factor:float=constants.screen_scale)->pygame.Surface:
     return pygame.transform.scale(surface,(surface.get_width()*factor,surface.get_height()*factor))
 def GetPressed(control)->bool:
@@ -235,22 +238,19 @@ for i in KeyCooldown:
 realclock = time.time()
 small_font = {"origin":{},"scaled_1":{},"scaled_2":{},"scaled_3":{}}
 key_img = {"origin":{},"scaled_1":{},"scaled_2":{},"scaled_3":{}}
+font_data = Spritesheet("assets/managers/font.png")
 menu = "main"
-text = "abcdefghijklmnopqrstuvwxyz0123456789_!()[]{}#+-=~"
-for i in text:
-    small_font["origin"].update({i:pygame.image.load(os.path.join(constants.FONT_PATH,i+".png"))})
-small_font["origin"].update({" ":pygame.image.load(os.path.join(constants.FONT_PATH,"_space_.png"))})
-small_font["origin"].update({".":pygame.image.load(os.path.join(constants.FONT_PATH,"_period_.png"))})
-small_font["origin"].update({"*":pygame.image.load(os.path.join(constants.FONT_PATH,"_asterisk_.png"))})
-small_font["origin"].update({"/":pygame.image.load(os.path.join(constants.FONT_PATH,"_slash_.png"))})
-small_font["origin"].update({"\\":pygame.image.load(os.path.join(constants.FONT_PATH,"_backslash_.png"))})
-small_font["origin"].update({"%":pygame.image.load(os.path.join(constants.FONT_PATH,"_percent_.png"))})
-small_font["origin"].update({":":pygame.image.load(os.path.join(constants.FONT_PATH,"_colon_.png"))})
-small_font["origin"].update({";":pygame.image.load(os.path.join(constants.FONT_PATH,"_semicolon_.png"))})
-small_font["origin"].update({",":pygame.image.load(os.path.join(constants.FONT_PATH,"_comma_.png"))})
-small_font["origin"].update({"?":pygame.image.load(os.path.join(constants.FONT_PATH,"_question_.png"))})
-small_font["origin"].update({"\"":pygame.image.load(os.path.join(constants.FONT_PATH,"_quotes_.png"))})
-small_font["origin"].update({"def":pygame.image.load(os.path.join(constants.FONT_PATH,"_unknown_.png"))})
+text = "abcdefghijklmnopqrstuvwxyz0123456789_*\\:,%.?\";/~-!()[]{}#+= "
+k=0
+for i in font_data.values():
+    if type(i)==dict:
+        for j in i.values():
+            if type(j)==pygame.Surface:
+                try:
+                    small_font["origin"].update({text[k]:j})
+                except IndexError:
+                    small_font["origin"].update({"def":j})
+                k+=1
 for i in small_font["origin"]:
     small_font["scaled_1"].update({i:pygame.transform.scale(small_font["origin"][i],(5*constants.screen_scale/2,7*constants.screen_scale/2))})
     small_font["scaled_2"].update({i:pygame.transform.scale(small_font["origin"][i],(5*constants.screen_scale,7*constants.screen_scale))})
